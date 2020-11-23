@@ -25,6 +25,8 @@
 GameApp::GameApp()
 : asdx::Application(L"Sample Game", 1280, 720, nullptr, nullptr, nullptr)
 {
+    m_SwapChainFormat   = DXGI_FORMAT_R10G10B10A2_UNORM;
+    m_EnableMultiSample = false;
 }
 
 //-----------------------------------------------------------------------------
