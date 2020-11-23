@@ -10,6 +10,7 @@
 #include <GameApp.h>
 #include <asdxLogger.h>
 #include <asdxRenderState.h>
+#include <TextureHelper.h>
 
 // 横17マス.
 // 縦11マス
@@ -22,7 +23,7 @@
 //      コンストラクタです.
 //-----------------------------------------------------------------------------
 GameApp::GameApp()
-: asdx::Application(L"Sample Game", 960, 540, nullptr, nullptr, nullptr)
+: asdx::Application(L"Sample Game", 1280, 720, nullptr, nullptr, nullptr)
 {
 }
 
@@ -42,13 +43,17 @@ bool GameApp::OnInit()
     m_Pad.SetPlayerIndex(0);
 
     // スプライトシステム初期化.
+    if (!m_Sprite.Init(m_pDevice, float(m_Width), float(m_Height)))
+    {    
+        ELOGA("Error : Sprite::Init() Failed.");
+        return false;
+    }
+
+    // ゲームマップテクスチャ初期化.
+    if (!GameMapTextureMgr::Instance().Init())
     {
-        m_Sprite = new asdx::Sprite();
-       if (!m_Sprite->Init(m_pDevice, m_Width, m_Height))
-       {    
-            ELOGA("Error : Sprite::Init() Failed.");
-            return false;
-       }
+        ELOGA("Error : GameMapTextureMgr::Init() Failed.");
+        return false;
     }
 
     // プレイヤー初期化
@@ -58,6 +63,35 @@ bool GameApp::OnInit()
         return false;
     }
 
+    // テスト用タイルデータ.
+    {
+        uint8_t id = 0;
+        for(uint8_t i=0; i<kTileCountY; ++i)
+        for(uint8_t j=0; j<kTileCountX; ++j)
+        {
+            if (i == 0 || j == 0 || j == (kTileCountX - 1) || i == (kTileCountY - 1)
+                || (i == 3 && j == 4) || ( i == 8 && j == 11 ))
+            {
+                Tile tile = {};
+                tile.Brekable = false;
+                tile.Moveable = false;
+                tile.Transition = false;
+                tile.TextureId = GAMEMAP_TEXTURE_TREE;
+                m_Map.SetTile(id, tile);
+            }
+            else
+            {
+                Tile tile = {};
+                tile.Brekable = false;
+                tile.Moveable = true;
+                tile.Transition = false;
+                tile.TextureId = GAMEMAP_TEXTURE_PLANE;
+                m_Map.SetTile(id, tile);
+            }
+
+            id++;
+        }
+    }
 
     return true;
 }
@@ -67,12 +101,10 @@ bool GameApp::OnInit()
 //-----------------------------------------------------------------------------
 void GameApp::OnTerm()
 {
-    if (m_Sprite != nullptr)
-    {
-        m_Sprite->Term();
-        delete m_Sprite;
-        m_Sprite = nullptr;
-    }
+    m_Sprite.Term();
+    m_Player.Term();
+
+    GameMapTextureMgr::Instance().Term();
 }
 
 //-----------------------------------------------------------------------------
@@ -83,7 +115,12 @@ void GameApp::OnFrameMove(asdx::FrameEventArgs& args)
     // パッド情報を更新.
     m_Pad.UpdateState();
 
-    m_Player.Update(m_Pad, args.ElapsedTime);
+    UpdateContext context;
+    context.ElapsedMsec = float(args.ElapsedTime);
+    context.Pad         = &m_Pad;
+    context.Map         = &m_Map;
+
+    m_Player.Update(context);
 }
 
 //-----------------------------------------------------------------------------
@@ -108,15 +145,22 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
     {
         auto pSmp = asdx::RenderState::GetInstance().GetSmp(asdx::SamplerType::LinearClamp);
         auto pBS  = asdx::RenderState::GetInstance().GetBS(asdx::BlendType::AlphaBlend);
+        auto pDSS = asdx::RenderState::GetInstance().GetDSS(asdx::DepthType::Default);
 
         float blendFactor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
         UINT mask = 0xffffff;
         m_pDeviceContext->OMSetBlendState(pBS, blendFactor, mask);
-        m_Sprite->Begin(m_pDeviceContext, asdx::Sprite::SHADER_TYPE_TEXTURE2D);
+        m_pDeviceContext->OMSetDepthStencilState(pDSS, 0);
+        m_Sprite.Begin(m_pDeviceContext);
 
+        // マップ描画.
+        m_Map.Draw(m_Sprite);
+
+        // キャラ描画.
         m_Player.Draw(m_Sprite);
 
-        m_Sprite->End(m_pDeviceContext);
+        m_Sprite.End(m_pDeviceContext);
+
     }
 
     // 画面に表示.

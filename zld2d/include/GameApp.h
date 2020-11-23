@@ -10,9 +10,10 @@
 //-----------------------------------------------------------------------------
 #include <asdxApp.h>
 #include <asdxHid.h>
-#include <asdxSprite.h>
 #include <asdxTexture.h>
 #include <Player.h>
+#include <SpriteSystem.h>
+#include <GameMap.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -43,9 +44,10 @@ private:
     // private variables.
     //=========================================================================
     asdx::GamePad       m_Pad;
-    asdx::Sprite*       m_Sprite        = nullptr;
-    asdx::Texture2D     m_Texture;
     Player              m_Player;
+    SpriteSystem        m_Sprite;
+    GameMap             m_Map;
+    asdx::Texture2D     m_Test;
 
     //=========================================================================
     // private methods.

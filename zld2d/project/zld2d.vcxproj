@@ -83,14 +83,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\Box.h" />
+    <ClInclude Include="..\include\DirectionState.h" />
+    <ClInclude Include="..\include\Enemy.h" />
     <ClInclude Include="..\include\GameApp.h" />
+    <ClInclude Include="..\include\GameMap.h" />
     <ClInclude Include="..\include\Player.h" />
+    <ClInclude Include="..\include\SpriteSystem.h" />
     <ClInclude Include="..\include\TextureHelper.h" />
+    <ClInclude Include="..\include\UpdateContext.h" />
+    <ClInclude Include="..\include\Vector2i.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\Enemy.cpp" />
     <ClCompile Include="..\src\GameApp.cpp" />
+    <ClCompile Include="..\src\GameMap.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\Player.cpp" />
+    <ClCompile Include="..\src\SpriteSystem.cpp" />
     <ClCompile Include="..\src\TextureHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
