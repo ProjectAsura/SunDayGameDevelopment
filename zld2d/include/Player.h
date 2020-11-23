@@ -13,6 +13,7 @@
 #include <SpriteSystem.h>
 #include <UpdateContext.h>
 #include <DirectionState.h>
+#include <Box.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -74,18 +75,34 @@ public:
     //-------------------------------------------------------------------------
     void Draw(SpriteSystem& sprite);
 
+    //-------------------------------------------------------------------------
+    //! @brief      ダメージを設定します.
+    //!
+    //! @retval true    死亡.
+    //! @retval false   生存.
+    //-------------------------------------------------------------------------
+    bool SetDamage();
+
+    //-------------------------------------------------------------------------
+    //! @brief      スポーンします.
+    //-------------------------------------------------------------------------
+    void Spawn(int x, int y, bool resetLife = false);
+
 private:
     //=========================================================================
     // private variables.
     //=========================================================================
     int                 m_Action        = 0;
-    int                 m_X             = 0;
-    int                 m_Y             = 0;
+    Box                 m_Box           = {};
+    Box                 m_HitBox        = {};
+    uint8_t             m_Life          = 3;
+    uint8_t             m_MaxLife       = 3;
     float               m_AnimLastTime  = 0.0f;
     DIRECTION_STATE     m_Direction     = DIRECTION_LEFT;
     uint8_t             m_AnimFrame     = 0;
     asdx::Texture2D     m_PlayerTexture[12];
     asdx::Texture2D     m_WeaponTexture[4];
+    int                 m_NonDamageFrame = 0;
 
     //=========================================================================
     // private methods.

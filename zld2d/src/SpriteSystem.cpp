@@ -302,6 +302,12 @@ void SpriteSystem::Begin( ID3D11DeviceContext* pDeviceContext )
 //-------------------------------------------------------------------------------------------------
 //      頂点バッファを更新します.
 //-------------------------------------------------------------------------------------------------
+void SpriteSystem::Draw(ID3D11ShaderResourceView* pSRV, const Box& box)
+{ Draw(pSRV, box.Pos.x, box.Pos.y, box.Size.x, box.Size.y, asdx::Vector2(0.0f, 0.0f), asdx::Vector2(1.0f, 1.0f), 0); }
+
+//-------------------------------------------------------------------------------------------------
+//      頂点バッファを更新します.
+//-------------------------------------------------------------------------------------------------
 void SpriteSystem::Draw(ID3D11ShaderResourceView* pSRV, const int x, const int y, const int w, const int h )
 { Draw(pSRV, x, y, w, h, asdx::Vector2( 0.0f, 0.0f ), asdx::Vector2( 1.0f, 1.0f ), 0 ); }
 

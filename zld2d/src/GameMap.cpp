@@ -95,7 +95,16 @@ void GameMap::Draw(SpriteSystem& sprite)
     }
 }
 
-bool GameMap::IsMovable(int& x, int& y, DIRECTION_STATE dir)
+//-----------------------------------------------------------------------------
+//      移動可能かどうかチェックします.
+//-----------------------------------------------------------------------------
+bool GameMap::CanMove(const Box& box, DIRECTION_STATE dir)
+{ return CanMove(box.Pos.x, box.Pos.y, box.Size.x, box.Size.y, dir); }
+
+//-----------------------------------------------------------------------------
+//      移動可能かどうかチェックします.
+//-----------------------------------------------------------------------------
+bool GameMap::CanMove(int x, int y, int w, int h, DIRECTION_STATE dir)
 {
     auto shiftX = ((x - kMarginX) % kTileSize) != 0;
     auto shiftY = ((y - kMarginY) % kTileSize) != 0;
@@ -104,7 +113,7 @@ bool GameMap::IsMovable(int& x, int& y, DIRECTION_STATE dir)
     auto idxL = CalcTileIndex(x, y);
 
     // 右下のタイルID.
-    auto idxR = CalcTileIndex(x + kTileSize, y + kTileSize);
+    auto idxR = CalcTileIndex(x + w, y + h);
 
     auto result = true;
 

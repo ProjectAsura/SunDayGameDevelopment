@@ -14,6 +14,7 @@
 #include <Player.h>
 #include <SpriteSystem.h>
 #include <GameMap.h>
+#include <enemy/EnemyTest.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,7 +48,7 @@ private:
     Player              m_Player;
     SpriteSystem        m_Sprite;
     GameMap             m_Map;
-    asdx::Texture2D     m_Test;
+    EnemyTest           m_EnemyTest;
 
     //=========================================================================
     // private methods.

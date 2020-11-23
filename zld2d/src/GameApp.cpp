@@ -12,8 +12,6 @@
 #include <asdxRenderState.h>
 #include <TextureHelper.h>
 
-// 横17マス.
-// 縦11マス
 
 ///////////////////////////////////////////////////////////////////////////////
 // GameApp class
@@ -65,6 +63,11 @@ bool GameApp::OnInit()
         return false;
     }
 
+    if (!m_EnemyTest.Init())
+    {
+        return false;
+    }
+
     // テスト用タイルデータ.
     {
         uint8_t id = 0;
@@ -106,6 +109,8 @@ void GameApp::OnTerm()
     m_Sprite.Term();
     m_Player.Term();
 
+    m_EnemyTest.Term();
+
     GameMapTextureMgr::Instance().Term();
 }
 
@@ -117,12 +122,27 @@ void GameApp::OnFrameMove(asdx::FrameEventArgs& args)
     // パッド情報を更新.
     m_Pad.UpdateState();
 
-    UpdateContext context;
-    context.ElapsedMsec = float(args.ElapsedTime);
+    UpdateContext context = {};
+    context.ElapsedSec  = float(args.ElapsedTime);
     context.Pad         = &m_Pad;
     context.Map         = &m_Map;
 
+    // プレイヤー更新.
     m_Player.Update(context);
+
+    // 敵更新.
+    m_EnemyTest.Update(context);
+
+
+    // ダメージ判定があった場合.
+    auto dead = false;
+    if (context.Damage)
+    { dead = m_Player.SetDamage(); }
+
+    // 死んでしまった場合.
+    if (dead)
+    {
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -158,8 +178,13 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
         // マップ描画.
         m_Map.Draw(m_Sprite);
 
+        // 敵描画.
+        m_EnemyTest.Draw(m_Sprite);
+
         // キャラ描画.
         m_Player.Draw(m_Sprite);
+
+        // UI描画.
 
         m_Sprite.End(m_pDeviceContext);
 
