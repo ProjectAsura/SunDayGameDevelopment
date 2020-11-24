@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------------
-// File : GameApp.h
-// Desc : Game Application.
+// File : Hud.h
+// Desc : Head Up Display.
 // Copyright(c) Project Asura. All right reserved.
 //-----------------------------------------------------------------------------
 #pragma once
@@ -8,20 +8,14 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include <asdxApp.h>
-#include <asdxHid.h>
-#include <asdxTexture.h>
-#include <Player.h>
 #include <SpriteSystem.h>
-#include <GameMap.h>
-#include <Hud.h>
-#include <enemy/EnemyTest.h>
+#include <Player.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// GameApp class
+// Hud class
 ///////////////////////////////////////////////////////////////////////////////
-class GameApp : public asdx::Application
+class Hud
 {
     //=========================================================================
     // list of friend classes and methods.
@@ -37,30 +31,20 @@ public:
     //=========================================================================
     // public methods.
     //=========================================================================
-    GameApp();
-    ~GameApp();
-
+    Hud();
+    ~Hud();
+    bool Init();
+    void Term();
+    void Draw(SpriteSystem& sprite, const Player& player);
 
 private:
     //=========================================================================
     // private variables.
     //=========================================================================
-    asdx::GamePad       m_Pad;
-    Player              m_Player;
-    SpriteSystem        m_Sprite;
-    GameMap             m_Map;
-    EnemyTest           m_EnemyTest;
-    Hud                 m_Hud;
+    asdx::Texture2D m_Texture[2];
 
     //=========================================================================
     // private methods.
     //=========================================================================
-    bool OnInit();
-    void OnTerm();
-    void OnFrameMove(asdx::FrameEventArgs& args);
-    void OnFrameRender(asdx::FrameEventArgs& args);
-    void OnResize(const asdx::ResizeEventArgs& args);
-    void OnKey(const asdx::KeyEventArgs& args);
-    void OnMouse(const asdx::MouseEventArgs& args);
-    void OnTyping(uint32_t keyCode);
+    /* NOTHING */
 };

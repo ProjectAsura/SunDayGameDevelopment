@@ -18,11 +18,11 @@
 //-----------------------------------------------------------------------------
 // Constant Values.
 //-----------------------------------------------------------------------------
-static const uint8_t kTileCountX        = 17;
+static const uint8_t kTileCountX        = 19;
 static const uint8_t kTileCountY        = 11;
 static const uint8_t kTileTotalCount    = kTileCountX * kTileCountY;
 static const uint8_t kTileSize          = 64;
-static const int     kMarginX           = 96;   // (1280 - kTileSize * kTileCountX) / 2;
+static const int     kMarginX           = 32;   // (1280 - kTileSize * kTileCountX) / 2;
 static const int     kMarginY           = 8;    // (720 - kTileSize * kTileCountY) / 2;
 
 
@@ -36,17 +36,16 @@ enum GAMEMAP_TEXTURE
     GAMEMAP_TEXTURE_TREE,       // 木
 };
 
-///////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
 // Tile structure
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 struct Tile
 {
     uint8_t     TextureId;      //!< テクスチャ番号.
     bool        Moveable;       //!< 移動可能.
-    bool        Brekable;       //!< 破壊可能.
     bool        Transition;     //!< マップ遷移可能.
 };
-
 
 //-----------------------------------------------------------------------------
 //      タイルインデックスを計算します.
@@ -110,17 +109,12 @@ public:
     //-------------------------------------------------------------------------
     //! @brief      描画します.
     //-------------------------------------------------------------------------
-    void Draw(SpriteSystem& sprite);
+    void Draw(SpriteSystem& sprite, int playerY);
 
     //-------------------------------------------------------------------------
     //! @brief      移動可能かどうかチェックします.
     //-------------------------------------------------------------------------
-    bool CanMove(const Box& box, DIRECTION_STATE dir);
-
-    //-------------------------------------------------------------------------
-    //! @brief      移動可能かどうかチェックします.
-    //-------------------------------------------------------------------------
-    bool CanMove(int x, int y, int w, int h, DIRECTION_STATE dir);
+    bool CanMove(const Box& nextBox);
 
 private:
     //=========================================================================

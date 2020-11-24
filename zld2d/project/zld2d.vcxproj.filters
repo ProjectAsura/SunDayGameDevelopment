@@ -54,6 +54,12 @@
     <ClInclude Include="..\include\enemy\EnemyTest.h">
       <Filter>ヘッダー ファイル\enemy</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\Hud.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Gimmick.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\GameApp.cpp">
@@ -77,5 +83,13 @@
     <ClCompile Include="..\src\enemy\EnemyTest.cpp">
       <Filter>ソースファイル\enemy</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Hud.cpp">
+      <Filter>ソースファイル</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\res\shader\SpritePS.hlsl">
+      <Filter>リソース ファイル</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

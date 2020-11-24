@@ -17,7 +17,7 @@
 namespace {
 
 #include "../../asdx11/res/shaders/Compiled/SpriteVS.inc"
-#include "../../asdx11/res/shaders/Compiled/SpritePS_Tex2D.inc"
+#include "../res/shader/Compiled/SpritePS.inc"
 
 } // namespace
 
@@ -166,7 +166,7 @@ bool SpriteSystem::Init
 
     {
         // ピクセルシェーダ生成.
-        hr = pDevice->CreatePixelShader( SpritePS_Tex2D, sizeof( SpritePS_Tex2D ), nullptr, m_pPS.GetAddress() );
+        hr = pDevice->CreatePixelShader( SpritePS, sizeof( SpritePS ), nullptr, m_pPS.GetAddress() );
         if ( FAILED( hr ) )
         {
             ELOG( "Error : ID3D11Device::CreatePixelShader() Failed." );
@@ -304,6 +304,12 @@ void SpriteSystem::Begin( ID3D11DeviceContext* pDeviceContext )
 //-------------------------------------------------------------------------------------------------
 void SpriteSystem::Draw(ID3D11ShaderResourceView* pSRV, const Box& box)
 { Draw(pSRV, box.Pos.x, box.Pos.y, box.Size.x, box.Size.y, asdx::Vector2(0.0f, 0.0f), asdx::Vector2(1.0f, 1.0f), 0); }
+
+//-------------------------------------------------------------------------------------------------
+//      頂点バッファを更新します.
+//-------------------------------------------------------------------------------------------------
+void SpriteSystem::Draw(ID3D11ShaderResourceView* pSRV, const Box& box, int layerDepth)
+{ Draw(pSRV, box.Pos.x, box.Pos.y, box.Size.x, box.Size.y, asdx::Vector2(0.0f, 0.0f), asdx::Vector2(1.0f, 1.0f), layerDepth); }
 
 //-------------------------------------------------------------------------------------------------
 //      頂点バッファを更新します.

@@ -63,6 +63,13 @@ bool GameApp::OnInit()
         return false;
     }
 
+    // HUD初期化.
+    if (!m_Hud.Init())
+    {
+        ELOGA("Error : Hud::Init() Failed.");
+        return false;
+    }
+
     if (!m_EnemyTest.Init())
     {
         return false;
@@ -78,7 +85,6 @@ bool GameApp::OnInit()
                 || (i == 3 && j == 4) || ( i == 8 && j == 11 ))
             {
                 Tile tile = {};
-                tile.Brekable = false;
                 tile.Moveable = false;
                 tile.Transition = false;
                 tile.TextureId = GAMEMAP_TEXTURE_TREE;
@@ -87,7 +93,6 @@ bool GameApp::OnInit()
             else
             {
                 Tile tile = {};
-                tile.Brekable = false;
                 tile.Moveable = true;
                 tile.Transition = false;
                 tile.TextureId = GAMEMAP_TEXTURE_PLANE;
@@ -108,6 +113,7 @@ void GameApp::OnTerm()
 {
     m_Sprite.Term();
     m_Player.Term();
+    m_Hud   .Term();
 
     m_EnemyTest.Term();
 
@@ -137,7 +143,7 @@ void GameApp::OnFrameMove(asdx::FrameEventArgs& args)
     // ダメージ判定があった場合.
     auto dead = false;
     if (context.Damage)
-    { dead = m_Player.SetDamage(); }
+    { dead = m_Player.ReceiveDamage(); }
 
     // 死んでしまった場合.
     if (dead)
@@ -176,7 +182,7 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
         m_Sprite.Begin(m_pDeviceContext);
 
         // マップ描画.
-        m_Map.Draw(m_Sprite);
+        m_Map.Draw(m_Sprite, m_Player.GetBox().Pos.y);
 
         // 敵描画.
         m_EnemyTest.Draw(m_Sprite);
@@ -185,6 +191,7 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
         m_Player.Draw(m_Sprite);
 
         // UI描画.
+        m_Hud.Draw(m_Sprite, m_Player);
 
         m_Sprite.End(m_pDeviceContext);
 

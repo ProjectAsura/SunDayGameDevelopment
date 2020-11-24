@@ -31,10 +31,13 @@ void EnemyTest::Update(UpdateContext& context)
     UpdateFrame();
 
     Box box(m_Pos, Vector2i(kTileSize, kTileSize));
+    Box nextBox = box;
+    nextBox.Pos += GetMoveDir(m_Direction) * 2;
 
     // 移動.
     {
-        if (context.Map->CanMove(box, m_Direction))
+        //if (context.Map->CanMove(box, m_Direction))
+        if (context.Map->CanMove(nextBox))
         { m_Pos += GetMoveDir(m_Direction) * 2; }
         else
         {
@@ -49,22 +52,22 @@ void EnemyTest::Update(UpdateContext& context)
         m_Direction = RollDice(m_Random);
     }
 
-    if (context.HitBox != nullptr)
-    {
-        if (IsHit(*context.HitBox, box))
-        {
-            m_Life--;
-            m_Frame = 0;
-        }
-    }
-
     if (m_Life > 0)
     {
+        if (context.HitBox != nullptr)
+        {
+            if (IsHit(*context.HitBox, box))
+            {
+                m_Life--;
+                m_Frame = 0;
+            }
+        }
+
         if (context.DamageBox != nullptr)
         { context.Damage |= IsHit(*context.DamageBox, box); }
     }
 
-    if (m_Life == 0 && m_Frame == 120)
+    if (m_Life <= 0 && m_Frame == 120)
     {
         m_Life = 1;
         m_Frame = 0;
@@ -76,5 +79,5 @@ void EnemyTest::Draw(SpriteSystem& sprite)
     if (m_Life == 0)
     { return; }
 
-    sprite.Draw(m_Texture.GetSRV(), m_Pos.x, m_Pos.y, 64, 64);
+    sprite.Draw(m_Texture.GetSRV(), m_Pos.x, m_Pos.y, 64, 64, 1);
 }

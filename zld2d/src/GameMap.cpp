@@ -76,7 +76,7 @@ Tile GameMap::GetTile(uint8_t id) const
 //-----------------------------------------------------------------------------
 //      描画処理を行います.
 //-----------------------------------------------------------------------------
-void GameMap::Draw(SpriteSystem& sprite)
+void GameMap::Draw(SpriteSystem& sprite, int playerY)
 {
     auto idx = 0;
     for(auto i=0u; i<kTileCountY; ++i)
@@ -86,95 +86,28 @@ void GameMap::Draw(SpriteSystem& sprite)
         idx++;
 
         auto pSRV = GetGameMap(tile.TextureId);
-
         auto step = (float)(j) / kTileCountX;
 
-        auto x = kMarginX + kTileSize * j;
-        auto y = kMarginY + kTileSize * i;
-        sprite.Draw(pSRV, x, y, kTileSize, kTileSize);
+        auto x = int(kMarginX + kTileSize * j);
+        auto y = int(kMarginY + kTileSize * i);
+
+        // キャラよりもY座標が下側なら手前に表示されるように調整.
+        auto z = (!tile.Moveable && (playerY < y)) ? 0 : 2;
+
+        sprite.Draw(pSRV, x, y, kTileSize, kTileSize, z);
     }
 }
 
 //-----------------------------------------------------------------------------
 //      移動可能かどうかチェックします.
 //-----------------------------------------------------------------------------
-bool GameMap::CanMove(const Box& box, DIRECTION_STATE dir)
-{ return CanMove(box.Pos.x, box.Pos.y, box.Size.x, box.Size.y, dir); }
-
-//-----------------------------------------------------------------------------
-//      移動可能かどうかチェックします.
-//-----------------------------------------------------------------------------
-bool GameMap::CanMove(int x, int y, int w, int h, DIRECTION_STATE dir)
+bool GameMap::CanMove(const Box& nextBox)
 {
-    auto shiftX = ((x - kMarginX) % kTileSize) != 0;
-    auto shiftY = ((y - kMarginY) % kTileSize) != 0;
-
-    // 左上のタイルID.
-    auto idxL = CalcTileIndex(x, y);
-
-    // 右下のタイルID.
-    auto idxR = CalcTileIndex(x + w, y + h);
-
-    auto result = true;
-
-    switch(dir)
-    {
-    case DIRECTION_LEFT:
-        {
-            if (!shiftX)
-            { idxL.x -= 1; }
-
-            auto id0 = CalcTileId(idxL);
-            result = m_Tile[id0].Moveable;
-            if (shiftY)
-            {
-                auto id1 = CalcTileId(Vector2i(idxL.x, idxR.y));
-                result &= m_Tile[id1].Moveable;
-            }
-        }
-        break;
-
-    case DIRECTION_RIGHT:
-        {
-            auto id0 = CalcTileId(Vector2i(idxR.x, idxL.y));
-            result = m_Tile[id0].Moveable;
-            if (shiftY)
-            {
-                auto id1 = CalcTileId(idxR);
-                result &= m_Tile[id1].Moveable;
-            }
-        }
-        break;
-
-    case DIRECTION_UP:
-        {
-            if (!shiftY)
-            { idxL.y -= 1; }
-
-            auto id0 = CalcTileId(idxL);
-            result = m_Tile[id0].Moveable;
-            if (shiftX)
-            {
-                auto id1 = CalcTileId(Vector2i(idxR.x, idxL.y));
-                result &= m_Tile[id1].Moveable;
-            }
-        }
-        break;
-
-    case DIRECTION_DOWN:
-        {
-            auto id0 = CalcTileId(Vector2i(idxL.x, idxR.y));
-            result = m_Tile[id0].Moveable;
-            if (shiftX)
-            {
-                auto id1 = CalcTileId(idxR);
-                result &= m_Tile[id1].Moveable;
-            }
-        }
-        break;
-    }
-
-    return result;
+    auto idx = CalcTileIndex(
+        nextBox.Pos.x + nextBox.Size.x / 2,
+        nextBox.Pos.y + nextBox.Size.y / 2);
+    auto id  = CalcTileId(idx);
+    return m_Tile[id].Moveable;
 }
 
 

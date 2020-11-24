@@ -197,16 +197,15 @@ void Player::Update(UpdateContext& context)
         m_Action = PLAYER_ACTION_NONE;
     }
 
+    auto box = m_Box;
+    box.Pos.x += int(x * kAdvancedPixel);
+    box.Pos.y -= int(y * kAdvancedPixel);
+
     // 隣のタイルに移動できるかどうかチェック.
-    if (context.Map->CanMove(m_Box, m_Direction))
+    if (context.Map->CanMove(box))
     {
         if (m_Action == PLAYER_ACTION_NONE)
-        {
-            if (x != 0)
-            { m_Box.Pos.x += int(x * kAdvancedPixel); }
-            else if (y != 0)
-            { m_Box.Pos.y -= int(y * kAdvancedPixel); }
-        }
+        { m_Box.Pos = box.Pos; }
     }
 
 #if 1
@@ -227,7 +226,7 @@ void Player::Update(UpdateContext& context)
 //-----------------------------------------------------------------------------
 //      ダメージを設定します.
 //-----------------------------------------------------------------------------
-bool Player::SetDamage()
+bool Player::ReceiveDamage()
 {
     if (m_Life > 0)
     {
@@ -265,13 +264,13 @@ void Player::Draw(SpriteSystem& sprite)
     {
         auto id   = GetPlayerId(m_Action, m_Direction, m_AnimFrame);
         auto pSRV = m_PlayerTexture[id].GetSRV();
-        sprite.Draw(pSRV, m_Box);
+        sprite.Draw(pSRV, m_Box, 1);
     }
 
     // 武器描画.
     if (m_Action == PLAYER_ACTION_ATTACK)
     {
         auto pSRV   = m_WeaponTexture[m_Direction].GetSRV();
-        sprite.Draw(pSRV, m_HitBox);
+        sprite.Draw(pSRV, m_HitBox, 1);
     }
 }
