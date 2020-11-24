@@ -43,3 +43,4 @@ inline bool IsHit(const Box& lhs, const Box& rhs)
         && lhs.Pos.y < (rhs.Pos.y + rhs.Size.y)
         && rhs.Pos.y < (lhs.Pos.y + lhs.Size.y);
 }
+

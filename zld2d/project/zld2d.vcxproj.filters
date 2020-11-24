@@ -86,6 +86,9 @@
     <ClCompile Include="..\src\Hud.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Gimmick.cpp">
+      <Filter>ソースファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\res\shader\SpritePS.hlsl">

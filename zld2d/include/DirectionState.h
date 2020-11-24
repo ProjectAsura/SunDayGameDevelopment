@@ -33,6 +33,7 @@ inline Vector2i GetMoveDir(DIRECTION_STATE state)
         Vector2i( 1,  0),
         Vector2i( 0, -1),   // 逆向きなので注意.
         Vector2i( 0,  1),   // 逆向きなので注意.
+        Vector2i( 0,  0),
     };
 
     return kDir[state];

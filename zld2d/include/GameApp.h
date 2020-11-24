@@ -11,11 +11,13 @@
 #include <asdxApp.h>
 #include <asdxHid.h>
 #include <asdxTexture.h>
+#include <asdxTarget.h>
 #include <Player.h>
 #include <SpriteSystem.h>
 #include <GameMap.h>
 #include <Hud.h>
 #include <enemy/EnemyTest.h>
+#include <Gimmick.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,6 +53,7 @@ private:
     GameMap             m_Map;
     EnemyTest           m_EnemyTest;
     Hud                 m_Hud;
+    Block               m_Block;
 
     //=========================================================================
     // private methods.

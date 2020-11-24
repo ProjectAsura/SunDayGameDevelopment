@@ -111,6 +111,7 @@
     <ClCompile Include="..\src\enemy\EnemyTest.cpp" />
     <ClCompile Include="..\src\GameApp.cpp" />
     <ClCompile Include="..\src\GameMap.cpp" />
+    <ClCompile Include="..\src\Gimmick.cpp" />
     <ClCompile Include="..\src\Hud.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\Player.cpp" />

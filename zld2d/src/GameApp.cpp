@@ -75,6 +75,8 @@ bool GameApp::OnInit()
         return false;
     }
 
+    m_Block.Init( 300, 400, 64, 64, DIRECTION_RIGHT, GetGameMap(GAMEMAP_TEXTURE_ROCK));
+
     // テスト用タイルデータ.
     {
         uint8_t id = 0;
@@ -139,6 +141,7 @@ void GameApp::OnFrameMove(asdx::FrameEventArgs& args)
     // 敵更新.
     m_EnemyTest.Update(context);
 
+    m_Block.Update(m_Player.GetBox());
 
     // ダメージ判定があった場合.
     auto dead = false;
@@ -183,6 +186,8 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
 
         // マップ描画.
         m_Map.Draw(m_Sprite, m_Player.GetBox().Pos.y);
+
+        m_Block.Draw(m_Sprite);
 
         // 敵描画.
         m_EnemyTest.Draw(m_Sprite);
