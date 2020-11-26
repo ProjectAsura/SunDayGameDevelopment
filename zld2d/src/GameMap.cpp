@@ -12,6 +12,7 @@
 #include <Vector2i.h>
 #include <TextureHelper.h>
 #include <asdxLogger.h>
+#include <Gimmick.h>
 
 
 namespace {
@@ -31,7 +32,8 @@ struct GameMapPath
 static const GameMapPath kGameMapTextures[] = {
     { GAMEMAP_TEXTURE_PLANE, "../res/texture/map/plane.tga" },
     { GAMEMAP_TEXTURE_ROCK,  "../res/texture/map/rock.tga" },
-    { GAMEMAP_TEXTURE_TREE,  "../res/texture/map/tree.tga" }
+    { GAMEMAP_TEXTURE_TREE,  "../res/texture/map/tree.tga" },
+    { GAMEMAP_TEXTURE_BLOCK, "../res/texture/map/block.tga" },
 };
 
 } // namemap
@@ -52,8 +54,7 @@ GameMap::GameMap()
 //      デストラクタです.
 //-----------------------------------------------------------------------------
 GameMap::~GameMap()
-{
-}
+{ ClearGimmicks(); }
 
 //-----------------------------------------------------------------------------
 //      タイルを設定します.
@@ -96,6 +97,16 @@ void GameMap::Draw(SpriteSystem& sprite, int playerY)
 
         sprite.Draw(pSRV, x, y, kTileSize, kTileSize, z);
     }
+
+    for(auto& itr : m_Gimmicks)
+    {
+        auto y = itr->GetBox().Pos.y;
+
+        // キャラよりもY座標が下側なら手前に表示されるように調整.
+        auto z = (playerY < y) ? 0 : 2;
+
+        itr->Draw(sprite, z);
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -107,9 +118,49 @@ bool GameMap::CanMove(const Box& nextBox)
         nextBox.Pos.x + nextBox.Size.x / 2,
         nextBox.Pos.y + nextBox.Size.y / 2);
     auto id  = CalcTileId(idx);
-    return m_Tile[id].Moveable;
+    if (!m_Tile[id].Moveable)
+    { return false; }
+
+    for(auto& itr : m_Gimmicks)
+    {
+        if (!itr->CanMove(nextBox))
+        { return false; }
+    }
+
+    return true;
 }
 
+//-----------------------------------------------------------------------------
+//      更新処理を行います.
+//-----------------------------------------------------------------------------
+void GameMap::Update(UpdateContext& context)
+{
+    for(auto& itr : m_Gimmicks)
+    { itr->Update(context); }
+}
+
+//-----------------------------------------------------------------------------
+//      ギミックを破棄します.
+//-----------------------------------------------------------------------------
+void GameMap::ClearGimmicks()
+{
+    auto itr = m_Gimmicks.begin();
+    while(itr != m_Gimmicks.end())
+    {
+        auto ptr = *itr;
+        delete ptr;
+    }
+    m_Gimmicks.clear();
+}
+
+//-----------------------------------------------------------------------------
+//      ギミックをリセットします.
+//-----------------------------------------------------------------------------
+void GameMap::ResetGimmicks()
+{
+    for(auto& itr : m_Gimmicks)
+    { itr->Reset(); }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // GameMapTextureMgr class

@@ -11,6 +11,7 @@
 #include <asdxLogger.h>
 #include <asdxRenderState.h>
 #include <TextureHelper.h>
+#include <gimmick/Block.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -75,7 +76,12 @@ bool GameApp::OnInit()
         return false;
     }
 
-    m_Block.Init( 300, 400, 64, 64, DIRECTION_RIGHT, GetGameMap(GAMEMAP_TEXTURE_ROCK));
+    //m_Block.Init( 300, 400, 64, 64, DIRECTION_RIGHT, GetGameMap(GAMEMAP_TEXTURE_ROCK));
+
+    auto block = new Block();
+    block->SetTilePos(4, 5).SetSize(64, 64).SetSRV(GetGameMap(GAMEMAP_TEXTURE_BLOCK));
+    //block->SetDir(DIRECTION_RIGHT);
+    m_Map.AddGimmick(block);
 
     // テスト用タイルデータ.
     {
@@ -118,6 +124,7 @@ void GameApp::OnTerm()
     m_Hud   .Term();
 
     m_EnemyTest.Term();
+    m_Map.ClearGimmicks();
 
     GameMapTextureMgr::Instance().Term();
 }
@@ -138,10 +145,11 @@ void GameApp::OnFrameMove(asdx::FrameEventArgs& args)
     // プレイヤー更新.
     m_Player.Update(context);
 
+    // マップ更新.
+    m_Map.Update(context);
+
     // 敵更新.
     m_EnemyTest.Update(context);
-
-    m_Block.Update(m_Player.GetBox());
 
     // ダメージ判定があった場合.
     auto dead = false;
@@ -186,8 +194,6 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
 
         // マップ描画.
         m_Map.Draw(m_Sprite, m_Player.GetBox().Pos.y);
-
-        m_Block.Draw(m_Sprite);
 
         // 敵描画.
         m_EnemyTest.Draw(m_Sprite);

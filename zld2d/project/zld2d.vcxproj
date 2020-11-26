@@ -100,6 +100,7 @@
     <ClInclude Include="..\include\GameApp.h" />
     <ClInclude Include="..\include\GameMap.h" />
     <ClInclude Include="..\include\Gimmick.h" />
+    <ClInclude Include="..\include\gimmick\Block.h" />
     <ClInclude Include="..\include\Hud.h" />
     <ClInclude Include="..\include\Player.h" />
     <ClInclude Include="..\include\SpriteSystem.h" />
@@ -112,6 +113,7 @@
     <ClCompile Include="..\src\GameApp.cpp" />
     <ClCompile Include="..\src\GameMap.cpp" />
     <ClCompile Include="..\src\Gimmick.cpp" />
+    <ClCompile Include="..\src\gimmick\Block.cpp" />
     <ClCompile Include="..\src\Hud.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\Player.cpp" />

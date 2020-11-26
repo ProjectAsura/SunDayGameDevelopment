@@ -19,6 +19,12 @@
     <Filter Include="ヘッダー ファイル\enemy">
       <UniqueIdentifier>{8ef51e3a-cf9b-48ce-ac13-c434ea7f0ec0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ヘッダー ファイル\gimmick">
+      <UniqueIdentifier>{6507cca2-c884-429b-915b-cd439abff8e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソースファイル\gimmick">
+      <UniqueIdentifier>{8ccdeb29-c207-4a00-adbe-797350c296ec}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\GameApp.h">
@@ -60,6 +66,9 @@
     <ClInclude Include="..\include\Gimmick.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\gimmick\Block.h">
+      <Filter>ヘッダー ファイル\gimmick</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\GameApp.cpp">
@@ -85,6 +94,9 @@
     </ClCompile>
     <ClCompile Include="..\src\Hud.cpp">
       <Filter>ソースファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gimmick\Block.cpp">
+      <Filter>ソースファイル\gimmick</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Gimmick.cpp">
       <Filter>ソースファイル</Filter>

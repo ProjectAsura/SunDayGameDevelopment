@@ -26,4 +26,5 @@ struct UpdateContext
     Box*            HitBox;         //!< プレイヤーの攻撃判定領域.
     Box*            DamageBox;      //!< プレイヤーのダメージ判定領域.
     bool            Damage;         //!< ダメージ判定に該当したらフラグを立てる.
+    uint8_t         PlayerDir;      //!< プレイヤーが向いている方向.
 };

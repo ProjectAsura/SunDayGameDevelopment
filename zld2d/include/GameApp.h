@@ -17,7 +17,6 @@
 #include <GameMap.h>
 #include <Hud.h>
 #include <enemy/EnemyTest.h>
-#include <Gimmick.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,7 +52,6 @@ private:
     GameMap             m_Map;
     EnemyTest           m_EnemyTest;
     Hud                 m_Hud;
-    Block               m_Block;
 
     //=========================================================================
     // private methods.

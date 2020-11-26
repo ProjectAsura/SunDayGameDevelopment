@@ -215,12 +215,19 @@ void Player::Update(UpdateContext& context)
         // リスポーン.
         m_Life = m_MaxLife;
     }
+
+    if (context.Pad->IsDown(asdx::PAD_Y))
+    {
+        context.Map->ResetGimmicks();
+    }
 #endif
 
     if (m_NonDamageFrame == 0)
     { context.DamageBox  = &m_Box; }
     else if (m_NonDamageFrame > 0)
     { m_NonDamageFrame--; }
+
+    context.PlayerDir = m_Direction;
 }
 
 //-----------------------------------------------------------------------------
