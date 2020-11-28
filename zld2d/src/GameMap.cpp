@@ -13,6 +13,7 @@
 #include <TextureHelper.h>
 #include <asdxLogger.h>
 #include <Gimmick.h>
+#include <Player.h>
 
 
 namespace {
@@ -89,8 +90,8 @@ void GameMap::Draw(SpriteSystem& sprite, int playerY)
         auto pSRV = GetGameMap(tile.TextureId);
         auto step = (float)(j) / kTileCountX;
 
-        auto x = int(kMarginX + kTileSize * j);
-        auto y = int(kMarginY + kTileSize * i);
+        auto x = int(kMarginX + kTileSize * j) + m_Scroll.x;
+        auto y = int(kMarginY + kTileSize * i) + m_Scroll.y;
 
         // キャラよりもY座標が下側なら手前に表示されるように調整.
         auto z = (!tile.Moveable && (playerY < y)) ? 0 : 2;
@@ -118,6 +119,16 @@ bool GameMap::CanMove(const Box& nextBox)
         nextBox.Pos.x + nextBox.Size.x / 2,
         nextBox.Pos.y + nextBox.Size.y / 2);
     auto id  = CalcTileId(idx);
+
+    if (m_Tile[id].Changable)
+    {
+        m_Flags |= GAMEMAP_FLAG_CHANGE;
+    }
+    else if (m_Tile[id].Scrollable)
+    {
+        m_Flags |= GAMEMAP_FLAG_SCROLL;
+    }
+
     if (!m_Tile[id].Moveable)
     { return false; }
 
@@ -137,6 +148,11 @@ void GameMap::Update(UpdateContext& context)
 {
     for(auto& itr : m_Gimmicks)
     { itr->Update(context); }
+
+    if (!!(m_Flags & GAMEMAP_FLAG_SCROLL))
+    { Scroll(DIRECTION_STATE(context.PlayerDir)); }
+    else if (!!(m_Flags & GAMEMAP_FLAG_SCROLL_END))
+    { m_Flags &= ~(GAMEMAP_FLAG_SCROLL_END); }
 }
 
 //-----------------------------------------------------------------------------
@@ -149,6 +165,7 @@ void GameMap::ClearGimmicks()
     {
         auto ptr = *itr;
         delete ptr;
+        itr++;
     }
     m_Gimmicks.clear();
 }
@@ -160,6 +177,76 @@ void GameMap::ResetGimmicks()
 {
     for(auto& itr : m_Gimmicks)
     { itr->Reset(); }
+}
+
+//-----------------------------------------------------------------------------
+//      フラグを取得します.
+//-----------------------------------------------------------------------------
+uint8_t GameMap::GetFlags() const
+{ return m_Flags; }
+
+//-----------------------------------------------------------------------------
+//      スクロールによるマップ切り替えを行います.
+//-----------------------------------------------------------------------------
+void GameMap::Scroll(DIRECTION_STATE dir)
+{
+    static const int kMaxiX = kMarginX + kTileSize * kTileCountX;
+    static const int kMaxiY = kMarginY + kTileSize * kTileCountY;
+
+    switch(dir)
+    {
+    case DIRECTION_LEFT:
+        if (m_Scroll.x < kMapMaxiX)
+        {
+            m_Scroll.x += kMapScrollX;
+        }
+        else
+        {
+            m_Scroll.x = 0.0f;
+            m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
+            m_Flags |= GAMEMAP_FLAG_SCROLL_END;
+        }
+        break;
+
+    case DIRECTION_RIGHT:
+        if (m_Scroll.x > -kMapMaxiX)
+        {
+            m_Scroll.x -= kMapScrollX;
+        }
+        else
+        {
+            m_Scroll.x = 0.0f;
+            m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
+            m_Flags |= GAMEMAP_FLAG_SCROLL_END;
+        }
+        break;
+
+    case DIRECTION_UP:
+        if (m_Scroll.y < kMapMaxiY)
+        {
+            m_Scroll.y += kMapScrollY;
+        }
+        else
+        {
+            m_Scroll.y = 0.0f;
+            m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
+            m_Flags |= GAMEMAP_FLAG_SCROLL_END;
+        }
+        break;
+
+    case DIRECTION_DOWN:
+        if (m_Scroll.y > -kMapMaxiY)
+        {
+            m_Scroll.y -= kMapScrollY;
+        }
+        else
+        {
+            m_Scroll.y = 0.0f;
+            m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
+            m_Flags |= GAMEMAP_FLAG_SCROLL_END;
+        }
+        break;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

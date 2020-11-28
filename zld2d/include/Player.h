@@ -86,7 +86,7 @@ public:
     //-------------------------------------------------------------------------
     //! @brief      スポーンします.
     //-------------------------------------------------------------------------
-    void Spawn(int x, int y, bool resetLife = false);
+    void Spawn(int tileX, int tileY, bool resetLife = false);
 
     //-------------------------------------------------------------------------
     //! @brief      ライフ数を取得します.
@@ -112,6 +112,8 @@ public:
     DIRECTION_STATE GetDir() const
     { return m_Direction; }
 
+    void Scroll();
+
 private:
     //=========================================================================
     // private variables.
@@ -127,9 +129,12 @@ private:
     asdx::Texture2D     m_PlayerTexture[12];
     asdx::Texture2D     m_WeaponTexture[4];
     int                 m_NonDamageFrame = 0;
+    uint8_t             m_Flags          = 0;
+    Vector2i            m_Scroll;
 
     //=========================================================================
     // private methods.
     //=========================================================================
-    /* NOTHING */
+
+    void SetTilePos(int tileX, int tileY);
 };

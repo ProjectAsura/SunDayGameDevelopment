@@ -59,6 +59,7 @@ static const Vector2i kOffset[] = {
     {  0,  64 }
 };
 
+
 //-----------------------------------------------------------------------------
 //      テクスチャ番号取得.
 //-----------------------------------------------------------------------------
@@ -112,8 +113,7 @@ bool Player::Init()
         { return false; }
     }
 
-    m_Box.Pos.x = kTileSize * 8;
-    m_Box.Pos.y = kTileSize * 5;
+    SetTilePos(3, 5);
 
     return true;
 }
@@ -148,6 +148,7 @@ void Player::Update(UpdateContext& context)
 
     int x = 0;
     int y = 0;
+    if ((context.Map->GetFlags() & GAMEMAP_FLAG_SCROLL) == 0)
     {
         // 右に進む.
         if (context.Pad->IsPush(asdx::PAD_RIGHT))
@@ -228,6 +229,38 @@ void Player::Update(UpdateContext& context)
     { m_NonDamageFrame--; }
 
     context.PlayerDir = m_Direction;
+
+    if (!!(context.Map->GetFlags() & GAMEMAP_FLAG_SCROLL))
+    {
+        if (next)
+        { m_AnimFrame = (m_AnimFrame + 1) & 0x1; }
+        Scroll();
+    }
+    else if (!!(context.Map->GetFlags() & GAMEMAP_FLAG_SCROLL_END))
+    {
+        m_Scroll.x  = 0;
+        m_Scroll.y  = 0;
+        m_AnimFrame = 0;
+
+        switch(m_Direction)
+        {
+        case DIRECTION_LEFT:
+            m_Box.Pos.x = kMapMaxiX - kTileSize;
+            break;
+
+        case DIRECTION_RIGHT:
+            m_Box.Pos.x = kMarginX + kTileSize;
+            break;
+
+        case DIRECTION_UP:
+            m_Box.Pos.y = kMapMaxiY - kTileSize;
+            break;
+
+        case DIRECTION_DOWN:
+            m_Box.Pos.y = kMarginY + kTileSize;
+            break;
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -247,10 +280,9 @@ bool Player::ReceiveDamage()
 //-----------------------------------------------------------------------------
 //      スポーンします.
 //-----------------------------------------------------------------------------
-void Player::Spawn(int x, int y, bool resetLife)
+void Player::Spawn(int tileX, int tileY, bool resetLife)
 {
-    m_Box.Pos.x = x;
-    m_Box.Pos.y = y;
+    SetTilePos(tileX, tileY);
 
     if (resetLife)
     { m_Life = m_MaxLife; }
@@ -271,7 +303,10 @@ void Player::Draw(SpriteSystem& sprite)
     {
         auto id   = GetPlayerId(m_Action, m_Direction, m_AnimFrame);
         auto pSRV = m_PlayerTexture[id].GetSRV();
-        sprite.Draw(pSRV, m_Box, 1);
+        auto box  = m_Box;
+        box.Pos += m_Scroll;
+
+        sprite.Draw(pSRV, box, 1);
     }
 
     // 武器描画.
@@ -280,4 +315,61 @@ void Player::Draw(SpriteSystem& sprite)
         auto pSRV   = m_WeaponTexture[m_Direction].GetSRV();
         sprite.Draw(pSRV, m_HitBox, 1);
     }
+}
+
+//-----------------------------------------------------------------------------
+//      スクロールによるマップ切り替えを行います.
+//-----------------------------------------------------------------------------
+void Player::Scroll()
+{
+    switch(m_Direction)
+    {
+    case DIRECTION_LEFT:
+        if (m_Scroll.x < kMapMaxiX)
+        {
+            m_Scroll.x += kCharaScrollX;
+        }
+        break;
+
+    case DIRECTION_RIGHT:
+        if (m_Scroll.x > -kMapMaxiX)
+        {
+            m_Scroll.x -= kCharaScrollX;
+        }
+        break;
+
+    case DIRECTION_UP:
+        if (m_Scroll.y < kMapMaxiY)
+        {
+            m_Scroll.y += kCharaScrollY;
+        }
+        break;
+
+
+    case DIRECTION_DOWN:
+        if (-m_Scroll.y < kMapMaxiY)
+        {
+            m_Scroll.y -= kCharaScrollY;
+        }
+        break;
+    }
+}
+
+//-----------------------------------------------------------------------------
+//      タイル位置を設定します.
+//-----------------------------------------------------------------------------
+void Player::SetTilePos(int tileX, int tileY)
+{
+    m_Box.Pos.x = kMarginX + tileX * kTileSize;
+    m_Box.Pos.y = kMarginY + tileY * kTileSize;
+
+    if (m_Box.Pos.x > kMapMaxiX)
+    { m_Box.Pos.x = kMapMaxiX; }
+    else if (m_Box.Pos.x < kMarginX)
+    { m_Box.Pos.x = kMarginX; }
+
+    if (m_Box.Pos.y > kMapMaxiY)
+    { m_Box.Pos.y = kMapMaxiY; }
+    else if (m_Box.Pos.y < kMarginY)
+    { m_Box.Pos.y = kMarginY; }
 }

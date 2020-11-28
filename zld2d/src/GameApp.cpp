@@ -89,12 +89,22 @@ bool GameApp::OnInit()
         for(uint8_t i=0; i<kTileCountY; ++i)
         for(uint8_t j=0; j<kTileCountX; ++j)
         {
-            if (i == 0 || j == 0 || j == (kTileCountX - 1) || i == (kTileCountY - 1)
+            if ((i == 5 && j == 0) || (i == 0 && j == 10) || (j == (kTileCountX - 1) && i == 5) || (j == 10 && i == (kTileCountY - 1)))
+            {
+                Tile tile = {};
+                tile.Moveable = false;
+                tile.Changable = false;
+                tile.Scrollable = true;
+                tile.TextureId = GAMEMAP_TEXTURE_PLANE;
+                m_Map.SetTile(id, tile);
+            }
+            else if (i == 0 || j == 0 || j == (kTileCountX - 1) || i == (kTileCountY - 1)
                 || (i == 3 && j == 4) || ( i == 8 && j == 11 ))
             {
                 Tile tile = {};
                 tile.Moveable = false;
-                tile.Transition = false;
+                tile.Changable = false;
+                tile.Scrollable = false;
                 tile.TextureId = GAMEMAP_TEXTURE_TREE;
                 m_Map.SetTile(id, tile);
             }
@@ -102,7 +112,8 @@ bool GameApp::OnInit()
             {
                 Tile tile = {};
                 tile.Moveable = true;
-                tile.Transition = false;
+                tile.Scrollable = false;
+                tile.Changable = false;
                 tile.TextureId = GAMEMAP_TEXTURE_PLANE;
                 m_Map.SetTile(id, tile);
             }

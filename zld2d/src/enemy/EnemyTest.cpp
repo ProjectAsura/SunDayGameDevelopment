@@ -28,6 +28,9 @@ void EnemyTest::Term()
 
 void EnemyTest::Update(UpdateContext& context)
 {
+    if (!!(context.Map->GetFlags() & GAMEMAP_FLAG_SCROLL))
+    { return; }
+
     UpdateFrame();
 
     Box box(m_Pos, Vector2i(kTileSize, kTileSize));

@@ -28,6 +28,14 @@ static const uint8_t kTileTotalCount    = kTileCountX * kTileCountY;
 static const uint8_t kTileSize          = 64;
 static const int     kMarginX           = 32;   // (1280 - kTileSize * kTileCountX) / 2;
 static const int     kMarginY           = 8;    // (720 - kTileSize * kTileCountY) / 2;
+static const int     kMapScrollX        = 16;
+static const int     kMapScrollY        = 10;
+static const int     kScrollFrameX      = (kMarginX + kTileSize * kTileCountX) / kMapScrollX;
+static const int     kScrollFrameY      = (kMarginY + kTileSize * kTileCountY) / kMapScrollY;
+static const int     kCharaScrollX      = (kMarginX + kTileSize * (kTileCountX - 2)) / kScrollFrameX;
+static const int     kCharaScrollY      = (kMarginY + kTileSize * (kTileCountY - 2)) / kScrollFrameY;
+static const int     kMapMaxiX          = kMarginX + kTileSize * (kTileCountX - 1);
+static const int     kMapMaxiY          = kMarginY + kTileSize * (kTileCountY - 1);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,6 +49,18 @@ enum GAMEMAP_TEXTURE
     GAMEMAP_TEXTURE_BLOCK,      // ブロック.
 };
 
+///////////////////////////////////////////////////////////////////////////////
+// GAMEMAP_FLAGS
+///////////////////////////////////////////////////////////////////////////////
+enum GAMEMAP_FLAGS 
+{
+    GAMEMAP_FLAG_NONE       = 0,            //!< デフォルト.
+    GAMEMAP_FLAG_SCROLL     = 0x1 << 0,     //!< スクロールによるマップ切り替え.
+    GAMEMAP_FLAG_SCROLL_END = 0x1 << 1,     //!< スクロール終了.
+    GAMEMAP_FLAG_CHANGE     = 0x1 << 2,     //!< 場面転換によるマップ切り替え.
+    GAMEMAP_FLAG_CHANGE_END = 0x1 << 3      //!< 場面転換終了.
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Tile structure
@@ -49,7 +69,8 @@ struct Tile
 {
     uint8_t     TextureId;      //!< テクスチャ番号.
     bool        Moveable;       //!< 移動可能.
-    bool        Transition;     //!< マップ遷移可能.
+    bool        Scrollable;     //!< スクロールによるマップ切り替え.
+    bool        Changable;      //!< 場面転換によるマップ切り替え(階段など).
 };
 
 //-----------------------------------------------------------------------------
@@ -142,17 +163,24 @@ public:
     //-------------------------------------------------------------------------
     void ResetGimmicks();
 
+    //-------------------------------------------------------------------------
+    //! @brief      フラグを取得します.
+    //-------------------------------------------------------------------------
+    uint8_t GetFlags() const;
+
 private:
     //=========================================================================
     // private variables.
     //=========================================================================
     Tile                m_Tile[kTileCountX * kTileCountY] = {};
     std::list<Gimmick*> m_Gimmicks;
+    Vector2i            m_Scroll;
+    uint8_t             m_Flags = 0;
 
     //=========================================================================
     // private methods.
     //=========================================================================
-    /* NOTHING */
+    void Scroll(DIRECTION_STATE dir);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
