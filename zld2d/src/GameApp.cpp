@@ -64,6 +64,8 @@ bool GameApp::OnInit()
         return false;
     }
 
+    AddEntity(0, &m_Player);
+
     // HUD初期化.
     if (!m_Hud.Init())
     {
@@ -93,7 +95,7 @@ bool GameApp::OnInit()
             {
                 Tile tile = {};
                 tile.Moveable = false;
-                tile.Changable = false;
+                tile.Switchable = false;
                 tile.Scrollable = true;
                 tile.TextureId = GAMEMAP_TEXTURE_PLANE;
                 m_Map.SetTile(id, tile);
@@ -103,7 +105,7 @@ bool GameApp::OnInit()
             {
                 Tile tile = {};
                 tile.Moveable = false;
-                tile.Changable = false;
+                tile.Switchable = false;
                 tile.Scrollable = false;
                 tile.TextureId = GAMEMAP_TEXTURE_TREE;
                 m_Map.SetTile(id, tile);
@@ -113,7 +115,7 @@ bool GameApp::OnInit()
                 Tile tile = {};
                 tile.Moveable = true;
                 tile.Scrollable = false;
-                tile.Changable = false;
+                tile.Switchable = false;
                 tile.TextureId = GAMEMAP_TEXTURE_PLANE;
                 m_Map.SetTile(id, tile);
             }
@@ -121,6 +123,8 @@ bool GameApp::OnInit()
             id++;
         }
     }
+
+    AddEntity(1, &m_Map);
 
     return true;
 }
@@ -161,16 +165,6 @@ void GameApp::OnFrameMove(asdx::FrameEventArgs& args)
 
     // 敵更新.
     m_EnemyTest.Update(context);
-
-    // ダメージ判定があった場合.
-    auto dead = false;
-    if (context.Damage)
-    { dead = m_Player.ReceiveDamage(); }
-
-    // 死んでしまった場合.
-    if (dead)
-    {
-    }
 }
 
 //-----------------------------------------------------------------------------

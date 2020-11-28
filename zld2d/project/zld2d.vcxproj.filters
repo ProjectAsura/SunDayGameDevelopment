@@ -69,6 +69,12 @@
     <ClInclude Include="..\include\gimmick\Block.h">
       <Filter>ヘッダー ファイル\gimmick</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\MessageId.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Entity.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\GameApp.cpp">
@@ -99,6 +105,9 @@
       <Filter>ソースファイル\gimmick</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Gimmick.cpp">
+      <Filter>ソースファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Entity.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
   </ItemGroup>

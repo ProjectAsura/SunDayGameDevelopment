@@ -23,8 +23,7 @@ struct UpdateContext
     asdx::GamePad*  Pad;            //!< ゲームパッド.
     float           ElapsedSec;     //!< 前フレームからの経過時間.
     GameMap*        Map;            //!< ゲームマップ.
-    Box*            HitBox;         //!< プレイヤーの攻撃判定領域.
-    Box*            DamageBox;      //!< プレイヤーのダメージ判定領域.
-    bool            Damage;         //!< ダメージ判定に該当したらフラグを立てる.
+    Box*            BoxYellow;      //!< 黄玉.
+    Box*            BoxRed;         //!< 赤玉.
     uint8_t         PlayerDir;      //!< プレイヤーが向いている方向.
 };

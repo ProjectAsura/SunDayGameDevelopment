@@ -11,6 +11,7 @@
 #include <gimmick/Block.h>
 #include <GameMap.h>
 #include <asdxLogger.h>
+#include <MessageId.h>
 
 
 namespace {
@@ -78,7 +79,7 @@ bool Block::CanMove(const Box& playerBox)
 //-----------------------------------------------------------------------------
 void Block::Update(UpdateContext& context)
 {
-    if (context.DamageBox == nullptr)
+    if (context.BoxRed == nullptr)
     { return; }
 
     // 動き切ったら処理しない.
@@ -121,3 +122,22 @@ void Block::Update(UpdateContext& context)
     m_PrevHit = m_CurrHit;
 }
 
+//-----------------------------------------------------------------------------
+//      メッセージ受信処理を行います.
+//-----------------------------------------------------------------------------
+void Block::OnReceive(const Message& msg)
+{
+    switch(msg.GetType())
+    {
+    case MESSAGE_ID_MAP_SCROLL:
+        OnScroll(msg);
+        break;
+
+    case MESSAGE_ID_MAP_CHANGED:
+        OnScrollCompleted();
+        break;
+
+    default:
+        break;
+    }
+}

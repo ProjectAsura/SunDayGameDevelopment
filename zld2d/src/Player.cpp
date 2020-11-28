@@ -14,6 +14,7 @@
 #include <asdxHid.h>
 #include <GameMap.h>
 #include <Vector2i.h>
+#include <MessageId.h>
 
 
 namespace {
@@ -191,7 +192,7 @@ void Player::Update(UpdateContext& context)
         m_AnimLastTime  = 0.0f;
 
         // 攻撃判定を設定.
-        context.HitBox = &m_HitBox;
+        context.BoxYellow = &m_HitBox;
     }
     else if (next)
     {
@@ -224,7 +225,7 @@ void Player::Update(UpdateContext& context)
 #endif
 
     if (m_NonDamageFrame == 0)
-    { context.DamageBox  = &m_Box; }
+    { context.BoxRed  = &m_Box; }
     else if (m_NonDamageFrame > 0)
     { m_NonDamageFrame--; }
 
@@ -234,47 +235,29 @@ void Player::Update(UpdateContext& context)
     {
         if (next)
         { m_AnimFrame = (m_AnimFrame + 1) & 0x1; }
-        Scroll();
-    }
-    else if (!!(context.Map->GetFlags() & GAMEMAP_FLAG_SCROLL_END))
-    {
-        m_Scroll.x  = 0;
-        m_Scroll.y  = 0;
-        m_AnimFrame = 0;
-
-        switch(m_Direction)
-        {
-        case DIRECTION_LEFT:
-            m_Box.Pos.x = kMapMaxiX - kTileSize;
-            break;
-
-        case DIRECTION_RIGHT:
-            m_Box.Pos.x = kMarginX + kTileSize;
-            break;
-
-        case DIRECTION_UP:
-            m_Box.Pos.y = kMapMaxiY - kTileSize;
-            break;
-
-        case DIRECTION_DOWN:
-            m_Box.Pos.y = kMarginY + kTileSize;
-            break;
-        }
     }
 }
 
 //-----------------------------------------------------------------------------
 //      ダメージを設定します.
 //-----------------------------------------------------------------------------
-bool Player::ReceiveDamage()
+void Player::OnReceiveDamage(const Message& msg)
 {
+    int damage = *msg.GetBufferAs<int>();
     if (m_Life > 0)
     {
-        m_Life--;
+        m_Life -= damage;
         m_NonDamageFrame = kNonDamageFrame;
     }
 
-    return (m_Life == 0);
+    if (m_Life <= 0)
+    {
+        m_Life = 0;
+
+        // 死亡メッセージを送信.
+        Message msg(MESSAGE_ID_PLAYER_DEAD);
+        SendMsg(msg);
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -320,37 +303,29 @@ void Player::Draw(SpriteSystem& sprite)
 //-----------------------------------------------------------------------------
 //      スクロールによるマップ切り替えを行います.
 //-----------------------------------------------------------------------------
-void Player::Scroll()
+void Player::OnScroll(const Message& msg)
 {
-    switch(m_Direction)
+    auto dir = *msg.GetBufferAs<uint8_t>();
+    switch(dir)
     {
     case DIRECTION_LEFT:
         if (m_Scroll.x < kMapMaxiX)
-        {
-            m_Scroll.x += kCharaScrollX;
-        }
+        { m_Scroll.x += kCharaScrollX; }
         break;
 
     case DIRECTION_RIGHT:
         if (m_Scroll.x > -kMapMaxiX)
-        {
-            m_Scroll.x -= kCharaScrollX;
-        }
+        { m_Scroll.x -= kCharaScrollX; }
         break;
 
     case DIRECTION_UP:
         if (m_Scroll.y < kMapMaxiY)
-        {
-            m_Scroll.y += kCharaScrollY;
-        }
+        { m_Scroll.y += kCharaScrollY; }
         break;
-
 
     case DIRECTION_DOWN:
         if (-m_Scroll.y < kMapMaxiY)
-        {
-            m_Scroll.y -= kCharaScrollY;
-        }
+        { m_Scroll.y -= kCharaScrollY; }
         break;
     }
 }
@@ -372,4 +347,64 @@ void Player::SetTilePos(int tileX, int tileY)
     { m_Box.Pos.y = kMapMaxiY; }
     else if (m_Box.Pos.y < kMarginY)
     { m_Box.Pos.y = kMarginY; }
+}
+
+//-----------------------------------------------------------------------------
+//      メッセージの受信処理を行います.
+//-----------------------------------------------------------------------------
+void Player::OnReceive(const Message& msg)
+{
+    switch(msg.GetType())
+    {
+    case MESSAGE_ID_PLAYER_DAMAGE:
+        {
+            OnReceiveDamage(msg);
+        }
+        break;
+
+    case MESSAGE_ID_MAP_SCROLL:
+        {
+            OnScroll(msg);
+        }
+        break;
+
+    case MESSAGE_ID_MAP_CHANGED:
+        {
+            OnScrollComplted();
+        }
+        break;
+
+    default:
+        break;
+    }
+}
+
+//-----------------------------------------------------------------------------
+//      スクロール完了時の処理です.
+//-----------------------------------------------------------------------------
+void Player::OnScrollComplted()
+{
+    m_Scroll.x  = 0;
+    m_Scroll.y  = 0;
+    m_AnimFrame = 0;
+    m_MapFlag   = 0;
+
+    switch(m_Direction)
+    {
+    case DIRECTION_LEFT:
+        m_Box.Pos.x = kMapMaxiX - kTileSize;
+        break;
+
+    case DIRECTION_RIGHT:
+        m_Box.Pos.x = kMarginX + kTileSize;
+        break;
+
+    case DIRECTION_UP:
+        m_Box.Pos.y = kMapMaxiY - kTileSize;
+        break;
+
+    case DIRECTION_DOWN:
+        m_Box.Pos.y = kMarginY + kTileSize;
+        break;
+    }
 }

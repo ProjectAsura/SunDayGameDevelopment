@@ -67,7 +67,15 @@ bool Gimmick::CanMove(const Box& playerBox)
 //      描画処理を行います.
 //-----------------------------------------------------------------------------
 void Gimmick::Draw(SpriteSystem& sprite, int layer)
-{ sprite.Draw(m_pSRV, m_Box, layer); }
+{ 
+    sprite.Draw(
+        m_pSRV,
+        m_Box.Pos.x + m_Scroll.x,
+        m_Box.Pos.y + m_Scroll.y,
+        m_Box.Size.x,
+        m_Box.Size.y,
+        layer);
+}
 
 //-----------------------------------------------------------------------------
 //      バウンディングボックスを取得します.
@@ -75,3 +83,41 @@ void Gimmick::Draw(SpriteSystem& sprite, int layer)
 Box Gimmick::GetBox() const
 { return m_Box; }
 
+//-----------------------------------------------------------------------------
+//      スクロール処理を行います.
+//-----------------------------------------------------------------------------
+void Gimmick::OnScroll(const Message& msg)
+{
+    auto dir = *msg.GetBufferAs<uint8_t>();
+    switch(dir)
+    {
+    case DIRECTION_LEFT:
+        if (m_Scroll.x < kMapMaxiX)
+        { m_Scroll.x += kMapScrollX; }
+        break;
+
+    case DIRECTION_RIGHT:
+        if (m_Scroll.x > -kMapMaxiX)
+        { m_Scroll.x -= kMapScrollX; }
+        break;
+
+    case DIRECTION_UP:
+        if (m_Scroll.y < kMapMaxiY)
+        { m_Scroll.y += kMapScrollY; }
+        break;
+
+    case DIRECTION_DOWN:
+        if (m_Scroll.y > -kMapMaxiY)
+        { m_Scroll.y -= kMapScrollY; }
+        break;
+    }
+}
+
+//-----------------------------------------------------------------------------
+//      スクロール完了時の処理です.
+//-----------------------------------------------------------------------------
+void Gimmick::OnScrollCompleted()
+{
+    m_Scroll.x = 0;
+    m_Scroll.y = 0;
+}

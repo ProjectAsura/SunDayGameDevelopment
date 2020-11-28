@@ -99,6 +99,8 @@
     <ClInclude Include="..\include\enemy\EnemyTest.h" />
     <ClInclude Include="..\include\GameApp.h" />
     <ClInclude Include="..\include\GameMap.h" />
+    <ClInclude Include="..\include\MessageId.h" />
+    <ClInclude Include="..\include\Entity.h" />
     <ClInclude Include="..\include\Gimmick.h" />
     <ClInclude Include="..\include\gimmick\Block.h" />
     <ClInclude Include="..\include\Hud.h" />
@@ -112,6 +114,7 @@
     <ClCompile Include="..\src\enemy\EnemyTest.cpp" />
     <ClCompile Include="..\src\GameApp.cpp" />
     <ClCompile Include="..\src\GameMap.cpp" />
+    <ClCompile Include="..\src\Entity.cpp" />
     <ClCompile Include="..\src\Gimmick.cpp" />
     <ClCompile Include="..\src\gimmick\Block.cpp" />
     <ClCompile Include="..\src\Hud.cpp" />

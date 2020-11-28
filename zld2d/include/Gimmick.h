@@ -13,12 +13,13 @@
 #include <UpdateContext.h>
 #include <SpriteSystem.h>
 #include <DirectionState.h>
+#include <Entity.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Gimmick class
 ///////////////////////////////////////////////////////////////////////////////
-class Gimmick
+class Gimmick : public IEntity
 {
     //=========================================================================
     // list of friend classes and methods.
@@ -89,11 +90,13 @@ protected:
     // protected variables.
     //=========================================================================
     Box                         m_Box;
-    ID3D11ShaderResourceView*   m_pSRV  = nullptr;
-    uint8_t                     m_Flags = 0;
+    ID3D11ShaderResourceView*   m_pSRV   = nullptr;
+    uint8_t                     m_Flags  = 0;
+    Vector2i                    m_Scroll = {};
 
     //=========================================================================
     // protected methods.
     //=========================================================================
-    /* NOTHING */
+    void OnScroll(const Message& msg);
+    void OnScrollCompleted();
 };

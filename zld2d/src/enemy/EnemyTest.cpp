@@ -1,5 +1,7 @@
 ﻿#include <enemy/EnemyTest.h>
 #include <GameMap.h>
+#include <Entity.h>
+#include <MessageId.h>
 
 
 EnemyTest::EnemyTest()
@@ -57,17 +59,24 @@ void EnemyTest::Update(UpdateContext& context)
 
     if (m_Life > 0)
     {
-        if (context.HitBox != nullptr)
+        if (context.BoxYellow != nullptr)
         {
-            if (IsHit(*context.HitBox, box))
+            if (IsHit(*context.BoxYellow, box))
             {
                 m_Life--;
                 m_Frame = 0;
             }
         }
 
-        if (context.DamageBox != nullptr)
-        { context.Damage |= IsHit(*context.DamageBox, box); }
+        if (context.BoxRed != nullptr)
+        {
+            if (IsHit(*context.BoxRed, box))
+            {
+                int damage = 1;
+                Message msg(MESSAGE_ID_PLAYER_DAMAGE, &damage, sizeof(damage));
+                SendMsg(msg);
+            }
+        }
     }
 
     if (m_Life <= 0 && m_Frame == 120)

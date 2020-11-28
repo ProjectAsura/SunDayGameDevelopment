@@ -14,6 +14,7 @@
 #include <asdxLogger.h>
 #include <Gimmick.h>
 #include <Player.h>
+#include <MessageId.h>
 
 
 namespace {
@@ -80,6 +81,8 @@ Tile GameMap::GetTile(uint8_t id) const
 //-----------------------------------------------------------------------------
 void GameMap::Draw(SpriteSystem& sprite, int playerY)
 {
+    auto scrolling = (m_Flags & GAMEMAP_FLAG_SCROLL);
+
     auto idx = 0;
     for(auto i=0u; i<kTileCountY; ++i)
     for(auto j=0u; j<kTileCountX; ++j)
@@ -94,7 +97,11 @@ void GameMap::Draw(SpriteSystem& sprite, int playerY)
         auto y = int(kMarginY + kTileSize * i) + m_Scroll.y;
 
         // キャラよりもY座標が下側なら手前に表示されるように調整.
-        auto z = (!tile.Moveable && (playerY < y)) ? 0 : 2;
+        auto condition = !tile.Moveable && (playerY < 0);
+        if (scrolling)
+        { condition = false; }
+
+        auto z = (condition) ? 0 : 2;
 
         sprite.Draw(pSRV, x, y, kTileSize, kTileSize, z);
     }
@@ -120,14 +127,10 @@ bool GameMap::CanMove(const Box& nextBox)
         nextBox.Pos.y + nextBox.Size.y / 2);
     auto id  = CalcTileId(idx);
 
-    if (m_Tile[id].Changable)
-    {
-        m_Flags |= GAMEMAP_FLAG_CHANGE;
-    }
+    if (m_Tile[id].Switchable)
+    { m_Flags |= GAMEMAP_FLAG_SWITCH; }
     else if (m_Tile[id].Scrollable)
-    {
-        m_Flags |= GAMEMAP_FLAG_SCROLL;
-    }
+    { m_Flags |= GAMEMAP_FLAG_SCROLL; }
 
     if (!m_Tile[id].Moveable)
     { return false; }
@@ -146,14 +149,29 @@ bool GameMap::CanMove(const Box& nextBox)
 //-----------------------------------------------------------------------------
 void GameMap::Update(UpdateContext& context)
 {
+    if (!!(m_Flags & GAMEMAP_FLAG_SWITCH))
+    {
+        Message msg(MESSAGE_ID_MAP_SWITCH);
+        SendMsg(msg);
+    }
+    else if (!!(m_Flags & GAMEMAP_FLAG_SCROLL))
+    {
+        Message msg(MESSAGE_ID_MAP_SCROLL, &context.PlayerDir, sizeof(context.PlayerDir));
+        SendMsg(msg);
+    }
+
     for(auto& itr : m_Gimmicks)
     { itr->Update(context); }
 
     if (!!(m_Flags & GAMEMAP_FLAG_SCROLL))
     { Scroll(DIRECTION_STATE(context.PlayerDir)); }
-    else if (!!(m_Flags & GAMEMAP_FLAG_SCROLL_END))
-    { m_Flags &= ~(GAMEMAP_FLAG_SCROLL_END); }
 }
+
+//-----------------------------------------------------------------------------
+//      ギミックを追加します.
+//-----------------------------------------------------------------------------
+void GameMap::AddGimmick(Gimmick* ptr)
+{ m_Gimmicks.push_back(ptr); }
 
 //-----------------------------------------------------------------------------
 //      ギミックを破棄します.
@@ -202,9 +220,12 @@ void GameMap::Scroll(DIRECTION_STATE dir)
         }
         else
         {
-            m_Scroll.x = 0.0f;
+            m_Scroll.x = 0;
             m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
-            m_Flags |= GAMEMAP_FLAG_SCROLL_END;
+
+            // 完了メッセージを送信.
+            Message msg(MESSAGE_ID_MAP_CHANGED);
+            SendMsg(msg);
         }
         break;
 
@@ -215,9 +236,12 @@ void GameMap::Scroll(DIRECTION_STATE dir)
         }
         else
         {
-            m_Scroll.x = 0.0f;
+            m_Scroll.x = 0;
             m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
-            m_Flags |= GAMEMAP_FLAG_SCROLL_END;
+
+            // 完了メッセージを送信.
+            Message msg(MESSAGE_ID_MAP_CHANGED);
+            SendMsg(msg);
         }
         break;
 
@@ -228,9 +252,12 @@ void GameMap::Scroll(DIRECTION_STATE dir)
         }
         else
         {
-            m_Scroll.y = 0.0f;
+            m_Scroll.y = 0;
             m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
-            m_Flags |= GAMEMAP_FLAG_SCROLL_END;
+
+            // 完了メッセージを送信.
+            Message msg(MESSAGE_ID_MAP_CHANGED);
+            SendMsg(msg);
         }
         break;
 
@@ -241,12 +268,24 @@ void GameMap::Scroll(DIRECTION_STATE dir)
         }
         else
         {
-            m_Scroll.y = 0.0f;
+            m_Scroll.y = 0;
             m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
-            m_Flags |= GAMEMAP_FLAG_SCROLL_END;
+
+            // 完了メッセージを送信.
+            Message msg(MESSAGE_ID_MAP_CHANGED);
+            SendMsg(msg);
         }
         break;
     }
+}
+
+//-----------------------------------------------------------------------------
+//      メッセージ受信処理を行います.
+//-----------------------------------------------------------------------------
+void GameMap::OnReceive(const Message& msg)
+{
+    for(auto& itr : m_Gimmicks)
+    { itr->OnReceive(msg); }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
