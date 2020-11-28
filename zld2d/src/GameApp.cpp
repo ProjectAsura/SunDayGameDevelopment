@@ -73,10 +73,10 @@ bool GameApp::OnInit()
         return false;
     }
 
-    if (!m_EnemyTest.Init())
-    {
-        return false;
-    }
+    //if (!m_EnemyTest.Init())
+    //{
+    //    return false;
+    //}
 
     //m_Block.Init( 300, 400, 64, 64, DIRECTION_RIGHT, GetGameMap(GAMEMAP_TEXTURE_ROCK));
 
@@ -138,8 +138,10 @@ void GameApp::OnTerm()
     m_Player.Term();
     m_Hud   .Term();
 
-    m_EnemyTest.Term();
+    //m_EnemyTest.Term();
     m_Map.ClearGimmicks();
+
+    EntityMgr::Instance().Clear();
 
     GameMapTextureMgr::Instance().Term();
 }
@@ -163,8 +165,8 @@ void GameApp::OnFrameMove(asdx::FrameEventArgs& args)
     // マップ更新.
     m_Map.Update(context);
 
-    // 敵更新.
-    m_EnemyTest.Update(context);
+    //// 敵更新.
+    //m_EnemyTest.Update(context);
 }
 
 //-----------------------------------------------------------------------------
@@ -200,8 +202,8 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
         // マップ描画.
         m_Map.Draw(m_Sprite, m_Player.GetBox().Pos.y);
 
-        // 敵描画.
-        m_EnemyTest.Draw(m_Sprite);
+        //// 敵描画.
+        //m_EnemyTest.Draw(m_Sprite);
 
         // キャラ描画.
         m_Player.Draw(m_Sprite);

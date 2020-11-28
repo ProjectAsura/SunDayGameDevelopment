@@ -16,7 +16,7 @@
 #include <SpriteSystem.h>
 #include <GameMap.h>
 #include <Hud.h>
-#include <enemy/EnemyTest.h>
+//#include <enemy/EnemyTest.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,7 +50,7 @@ private:
     Player              m_Player;
     SpriteSystem        m_Sprite;
     GameMap             m_Map;
-    EnemyTest           m_EnemyTest;
+    //EnemyTest           m_EnemyTest;
     Hud                 m_Hud;
 
     //=========================================================================

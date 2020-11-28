@@ -149,55 +149,68 @@ void Player::Update(UpdateContext& context)
 
     int x = 0;
     int y = 0;
+
+    // スロール中ではない場合.
     if ((context.Map->GetFlags() & GAMEMAP_FLAG_SCROLL) == 0)
     {
-        // 右に進む.
-        if (context.Pad->IsPush(asdx::PAD_RIGHT))
+        if (m_Action == PLAYER_ACTION_NONE)
         {
-            m_Direction = DIRECTION_RIGHT;
-            x = 1;
-        }
-        // 左に進む.
-        else if (context.Pad->IsPush(asdx::PAD_LEFT))
-        {
-            m_Direction = DIRECTION_LEFT;
-            x = -1;
-        }
-        // 上に進む.
-        else if (context.Pad->IsPush(asdx::PAD_UP))
-        {
-            m_Direction = DIRECTION_UP;
-            y = 1;
-        }
-        // 下に進む.
-        else if (context.Pad->IsPush(asdx::PAD_DOWN))
-        {
-            m_Direction = DIRECTION_DOWN;
-            y = -1;
+            // 右に進む.
+            if (context.Pad->IsPush(asdx::PAD_RIGHT))
+            {
+                m_Direction = DIRECTION_RIGHT;
+                x = 1;
+            }
+            // 左に進む.
+            else if (context.Pad->IsPush(asdx::PAD_LEFT))
+            {
+                m_Direction = DIRECTION_LEFT;
+                x = -1;
+            }
+            // 上に進む.
+            else if (context.Pad->IsPush(asdx::PAD_UP))
+            {
+                m_Direction = DIRECTION_UP;
+                y = 1;
+            }
+            // 下に進む.
+            else if (context.Pad->IsPush(asdx::PAD_DOWN))
+            {
+                m_Direction = DIRECTION_DOWN;
+                y = -1;
+            }
+
+            if ((x != 0 || y != 0) && next)
+            { m_AnimFrame = (m_AnimFrame + 1) & 0x1; }
         }
 
-        if ((x != 0 || y != 0) && next)
+        if (context.Pad->IsDown(asdx::PAD_A))
+        {
+            auto offset = kOffset[m_Direction];
+
+            // 攻撃判定範囲を更新.
+            m_HitBox.Pos.x  = m_Box.Pos.x + offset.x;
+            m_HitBox.Pos.y  = m_Box.Pos.y + offset.y;
+
+            m_Action        = PLAYER_ACTION_ATTACK;
+            m_AnimLastTime  = 0.0f;
+
+            // 攻撃判定を設定.
+            context.BoxYellow = &m_HitBox;
+        }
+        else if (next)
+        {
+            m_Action = PLAYER_ACTION_NONE;
+        }
+    }
+    else
+    {
+        if (next)
         { m_AnimFrame = (m_AnimFrame + 1) & 0x1; }
     }
 
-    if (context.Pad->IsDown(asdx::PAD_A))
-    {
-        auto offset = kOffset[m_Direction];
+    context.PlayerDir = m_Direction;
 
-        // 攻撃判定範囲を更新.
-        m_HitBox.Pos.x  = m_Box.Pos.x + offset.x;
-        m_HitBox.Pos.y  = m_Box.Pos.y + offset.y;
-
-        m_Action        = PLAYER_ACTION_ATTACK;
-        m_AnimLastTime  = 0.0f;
-
-        // 攻撃判定を設定.
-        context.BoxYellow = &m_HitBox;
-    }
-    else if (next)
-    {
-        m_Action = PLAYER_ACTION_NONE;
-    }
 
     auto box = m_Box;
     box.Pos.x += int(x * kAdvancedPixel);
@@ -229,13 +242,6 @@ void Player::Update(UpdateContext& context)
     else if (m_NonDamageFrame > 0)
     { m_NonDamageFrame--; }
 
-    context.PlayerDir = m_Direction;
-
-    if (!!(context.Map->GetFlags() & GAMEMAP_FLAG_SCROLL))
-    {
-        if (next)
-        { m_AnimFrame = (m_AnimFrame + 1) & 0x1; }
-    }
 }
 
 //-----------------------------------------------------------------------------
@@ -324,7 +330,7 @@ void Player::OnScroll(const Message& msg)
         break;
 
     case DIRECTION_DOWN:
-        if (-m_Scroll.y < kMapMaxiY)
+        if (m_Scroll.y > -kMapMaxiY)
         { m_Scroll.y -= kCharaScrollY; }
         break;
     }

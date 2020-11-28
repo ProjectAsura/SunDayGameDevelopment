@@ -14,4 +14,5 @@ enum MESSAGE_ID : unsigned int
     MESSAGE_ID_MAP_CHANGED,    // マップ切り替え完了.
     MESSAGE_ID_PLAYER_DAMAGE,  // プレイヤーへのダメージ.
     MESSAGE_ID_PLAYER_DEAD,    // プレイヤーのHPが0になったとき.
+    MESSAGE_ID_ENEMY_DEAD,     // 敵のHPが0になったとき.
 };
