@@ -21,8 +21,7 @@
 //-----------------------------------------------------------------------------
 Gimmick& Gimmick::SetTilePos(int tileX, int tileY)
 {
-    m_Box.Pos.x = kMarginX + kTileSize * tileX;
-    m_Box.Pos.y = kMarginY + kTileSize * tileY;
+    m_Box.Pos = CalcPosFromTile(tileX, tileY);
     return *this;
 }
 

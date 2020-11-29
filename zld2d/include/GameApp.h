@@ -17,6 +17,7 @@
 #include <GameMap.h>
 #include <Hud.h>
 //#include <enemy/EnemyTest.h>
+#include <TextWriter.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,6 +54,8 @@ private:
     //EnemyTest           m_EnemyTest;
     Hud                 m_Hud;
     GameMapData         m_MapData;
+
+    TextWriter          m_TextWriter;
 
     //=========================================================================
     // private methods.

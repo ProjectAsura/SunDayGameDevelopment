@@ -32,6 +32,8 @@ static const uint8_t kTileTotalCount    = kTileCountX * kTileCountY;
 static const uint8_t kTileSize          = 64;
 static const int     kMarginX           = 32;   // (1280 - kTileSize * kTileCountX) / 2;
 static const int     kMarginY           = 8;    // (720 - kTileSize * kTileCountY) / 2;
+static const int     kTileOffsetX       = kMarginX;
+static const int     kTileOffsetY       = kMarginY;
 static const int     kTileTotalW        = kTileSize * kTileCountX;
 static const int     kTileTotalH        = kTileSize * kTileCountY;
 static const int     kScrollFrame       = 64;   // kTileSizeを割り切れる値に設定.
@@ -39,8 +41,8 @@ static const float   kMapScrollX        = float(kTileTotalW) / float(kScrollFram
 static const float   kMapScrollY        = float(kTileTotalH) / float(kScrollFrame);
 static const float   kCharaScrollX      = float(kTileSize * (kTileCountX - 2) - kTileSize / 2) / float(kScrollFrame);   // 左右1タイル分を除く + 半キャラ分補正.
 static const float   kCharaScrollY      = float(kTileSize * (kTileCountY - 2) - kTileSize / 2) / float(kScrollFrame);   // 上下1タイル分を除く + 半キャラ分補正.
-static const int     kMapMaxiX          = kMarginX + kTileSize * (kTileCountX - 1);
-static const int     kMapMaxiY          = kMarginY + kTileSize * (kTileCountY - 1);
+static const int     kMapMaxiX          = kTileOffsetX + kTileSize * (kTileCountX - 1);
+static const int     kMapMaxiY          = kTileOffsetY + kTileSize * (kTileCountY - 1);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -81,10 +83,10 @@ struct Tile
 //-----------------------------------------------------------------------------
 //      タイルインデックスを計算します.
 //-----------------------------------------------------------------------------
-inline Vector2i CalcTileIndex(int x, int y)
+inline Vector2i CalcTileIndex(int posX, int posY)
 {
-    auto ix = (x - kMarginX) / kTileSize;
-    auto iy = (y - kMarginY) / kTileSize;
+    auto ix = (posX - kTileOffsetX) / kTileSize;
+    auto iy = (posY - kTileOffsetY) / kTileSize;
 
     if (ix >= (kTileCountX - 1))
     { ix = kTileCountX - 1; }
@@ -104,6 +106,16 @@ inline Vector2i CalcTileIndex(int x, int y)
 //-----------------------------------------------------------------------------
 inline uint8_t CalcTileId(const Vector2i& index)
 { return uint8_t(index.x) + uint8_t(index.y) * kTileCountX; }
+
+//-----------------------------------------------------------------------------
+//      タイルインデックスから位置座標を求めます.
+//-----------------------------------------------------------------------------
+inline Vector2i CalcPosFromTile(int tileX, int tileY)
+{
+    return Vector2i(
+        kTileOffsetX + kTileSize * tileX,
+        kTileOffsetY + kTileSize * tileY);
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////

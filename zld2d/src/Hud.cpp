@@ -17,23 +17,16 @@ namespace {
 //-----------------------------------------------------------------------------
 // Constant Values.
 //-----------------------------------------------------------------------------
-static const int kLifeOffsetX = 2;
-static const int kLifeOffsetY = 2;
+static const int kLifeOffsetX = 32;
+static const int kLifeOffsetY = 8;
 static const int kLifeSize    = 32;
 
 static const char* kTextures[] = {
     "../res/texture/hud/star_full.tga",
-    "../res/texture/hud/star_lack.tga"
+    "../res/texture/hud/star_lack.tga",
+    "../res/texture/hud/white.tga",
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// HUD_TEXTURE enum
-///////////////////////////////////////////////////////////////////////////////
-enum HUD_TEXTURE
-{
-    HUD_TEXTURE_LIFE_FULL,  // 満☆
-    HUD_TEXTURE_LIFE_LACK,  // 欠☆
-};
 
 } // namespace
 
@@ -59,7 +52,7 @@ Hud::~Hud()
 //-----------------------------------------------------------------------------
 bool Hud::Init()
 {
-    for(auto i=0; i<2; ++i)
+    for(auto i=0; i<_countof(kTextures); ++i)
     {
         if (!LoadTexture2D(kTextures[i], m_Texture[i]))
         {
@@ -76,7 +69,7 @@ bool Hud::Init()
 //-----------------------------------------------------------------------------
 void Hud::Term()
 {
-    for(auto i=0; i<2; ++i)
+    for(auto i=0; i<_countof(kTextures); ++i)
     { m_Texture[i].Release(); }
 }
 
@@ -86,12 +79,13 @@ void Hud::Term()
 void Hud::Draw(SpriteSystem& sprite, const Player& player)
 {
     auto curLife = player.GetLife();
-    auto maxLife = player.GetMaxLife();
+    auto maxLife = player.GetMaxLife(); // MAX 10まで.
 
     for(auto i=1; i<=maxLife; ++i)
     {
         if (i <= curLife)
         {
+            sprite.SetColor(1.0f, 1.0f, 1.0f, 1.0f);
             sprite.Draw(
                 m_Texture[HUD_TEXTURE_LIFE_FULL].GetSRV(),
                 kLifeOffsetX + kLifeSize * (i - 1),
@@ -101,6 +95,7 @@ void Hud::Draw(SpriteSystem& sprite, const Player& player)
         }
         else
         {
+            sprite.SetColor(1.0f, 1.0f, 1.0f, 0.75f);
             sprite.Draw(
                 m_Texture[HUD_TEXTURE_LIFE_LACK].GetSRV(),
                 kLifeOffsetX + kLifeSize * (i - 1),

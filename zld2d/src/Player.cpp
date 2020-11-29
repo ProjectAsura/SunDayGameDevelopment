@@ -368,7 +368,7 @@ void Player::OnScrollComplted()
         break;
 
     case DIRECTION_RIGHT:
-        m_Box.Pos.x = kMarginX + kTileSize;
+        m_Box.Pos.x = kTileOffsetX + kTileSize;
         break;
 
     case DIRECTION_UP:
@@ -376,7 +376,7 @@ void Player::OnScrollComplted()
         break;
 
     case DIRECTION_DOWN:
-        m_Box.Pos.y = kMarginY + kTileSize;
+        m_Box.Pos.y = kTileOffsetY + kTileSize;
         break;
     }
 

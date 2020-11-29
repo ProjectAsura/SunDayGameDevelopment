@@ -24,7 +24,7 @@
 GameApp::GameApp()
 : asdx::Application(L"Sample Game", 1280, 720, nullptr, nullptr, nullptr)
 {
-    m_SwapChainFormat   = DXGI_FORMAT_R10G10B10A2_UNORM;
+    m_SwapChainFormat   = DXGI_FORMAT_R8G8B8A8_UNORM;
     m_EnableMultiSample = false;
 }
 
@@ -94,7 +94,7 @@ bool GameApp::OnInit()
             if ((i == 5 && j == 0) || (i == 0 && j == 10) || (j == (kTileCountX - 1) && i == 5) || (j == 10 && i == (kTileCountY - 1)))
             {
                 Tile tile = {};
-                tile.Moveable = false;
+                tile.Moveable = true;
                 tile.Switchable = false;
                 tile.Scrollable = true;
                 tile.TextureId = GAMEMAP_TEXTURE_PLANE;
@@ -128,6 +128,13 @@ bool GameApp::OnInit()
 
     AddEntity(1, &m_Map);
 
+
+    if (!m_TextWriter.Init(m_pFactoryDW.GetPtr(), m_pDeviceContext2D.GetPtr(), L"../res/font/07やさしさゴシック.ttf", 32))
+    {
+        ELOG("Error : TextWriter::Init() Failed.");
+        return false;
+    }
+
     return true;
 }
 
@@ -141,6 +148,8 @@ void GameApp::OnTerm()
     m_Hud   .Term();
 
     //m_EnemyTest.Term();
+
+    m_TextWriter.Term();
 
     EntityMgr::Instance().Clear();
 
@@ -185,13 +194,22 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
     m_pDeviceContext->ClearDepthStencilView(pDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
     m_pDeviceContext->OMSetRenderTargets(1, &pRTV, pDSV);
-    m_pDeviceContext->RSSetViewports(1, &m_Viewport);
+
+    D3D11_VIEWPORT viewport = {};
+    viewport.TopLeftX   = kMarginX;
+    viewport.TopLeftY   = kMarginY;
+    viewport.Width      = m_Width  - float(kMarginX) * 2;
+    viewport.Height     = m_Height - float(kMarginY) * 2;
+    viewport.MinDepth   = 0.0f;
+    viewport.MaxDepth   = 1.0f;
 
     D3D11_RECT scissor = {};
-    scissor.left    = kMarginX;
-    scissor.right   = kMarginX + kTileTotalW;
-    scissor.top     = kMarginY;
-    scissor.bottom  = kMarginY + kTileTotalH;
+    scissor.left        = kMarginX;
+    scissor.right       = m_Width - kMarginX;
+    scissor.top         = kMarginY;
+    scissor.bottom      = m_Height - kMarginY;
+
+    m_pDeviceContext->RSSetViewports(1, &viewport);
     m_pDeviceContext->RSSetScissorRects(1, &scissor);
 
     // スワップチェインに描画.
@@ -205,13 +223,14 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
         m_pDeviceContext->OMSetBlendState(pBS, blendFactor, mask);
         m_pDeviceContext->OMSetDepthStencilState(pDSS, 0);
         m_Sprite.Begin(m_pDeviceContext);
+        m_Sprite.SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         // 次のマップをスクロールしながら表示.
         if (!!(m_Map.GetFlags() & GAMEMAP_FLAG_SCROLL))
         {
             auto dir = GetMoveDir(m_Player.GetDir());
             auto pos = Vector2i(kTileTotalW, kTileTotalH) * dir + m_Map.GetScroll();
-            m_MapData.Draw(m_Sprite, pos.x + kMarginX, pos.y + kMarginY);
+            m_MapData.Draw(m_Sprite, pos.x + kTileOffsetX, pos.y + kTileOffsetY);
         }
 
         // マップ描画.
@@ -229,6 +248,25 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
 
         m_Sprite.End(m_pDeviceContext);
 
+    }
+
+    // Direct2D
+    {
+        m_pDeviceContext2D->BeginDraw();
+        m_pDeviceContext2D->SetTarget(m_pBitmap2D.GetPtr());
+
+        wchar_t fps[64] = {};
+        swprintf_s(fps, L"FPS: %f", args.FPS);
+
+        //D2D_RECT_F rect;
+        //rect.left = 0;
+        //rect.right = m_Width;
+        //rect.top = 0;
+        //rect.bottom = m_Height;
+        //m_pDeviceContext2D->DrawText(fps, wcslen(fps), m_pDefaultTextFormat.GetPtr(), &rect, m_pDefaultBrush.GetPtr());
+        m_TextWriter.Draw(m_pDeviceContext2D.GetPtr(), L"てすと", 0, 0);
+
+        m_pDeviceContext2D->EndDraw();
     }
 
     // 画面に表示.

@@ -91,8 +91,8 @@ void GameMapData::Draw(SpriteSystem& sprite, int offsetX, int offsetY)
     {
         auto box  = itr->GetBox();
         auto pSRV = itr->GetSRV();
-        auto x = int(offsetX + box.Pos.x) - kMarginX;
-        auto y = int(offsetY + box.Pos.y) - kMarginY;
+        auto x = int(offsetX + box.Pos.x) - kTileOffsetX;
+        auto y = int(offsetY + box.Pos.y) - kTileOffsetY;
 
         sprite.Draw(pSRV, x, y, box.Size.x, box.Size.y, 2);
     }
@@ -136,8 +136,6 @@ Tile GameMap::GetTile(uint8_t id) const
 //-----------------------------------------------------------------------------
 void GameMap::Draw(SpriteSystem& sprite, int playerY)
 {
-    auto scrolling = (m_Flags & GAMEMAP_FLAG_SCROLL);
-
     auto idx = 0;
     for(auto i=0u; i<kTileCountY; ++i)
     for(auto j=0u; j<kTileCountX; ++j)
@@ -148,15 +146,11 @@ void GameMap::Draw(SpriteSystem& sprite, int playerY)
         auto pSRV = GetGameMap(tile.TextureId);
         auto step = (float)(j) / kTileCountX;
 
-        auto x = int(kMarginX + kTileSize * j) + int(m_Scroll.x);
-        auto y = int(kMarginY + kTileSize * i) + int(m_Scroll.y);
+        auto x = int(kTileOffsetX + kTileSize * j) + int(m_Scroll.x);
+        auto y = int(kTileOffsetY + kTileSize * i) + int(m_Scroll.y);
 
         // キャラよりもY座標が下側なら手前に表示されるように調整.
-        auto condition = !tile.Moveable && (playerY < 0);
-        if (scrolling)
-        { condition = false; }
-
-        auto z = (condition) ? 0 : 2;
+        auto z = (!tile.Moveable && (playerY < y)) ? 0 : 2;
 
         sprite.Draw(pSRV, x, y, kTileSize, kTileSize, z);
     }

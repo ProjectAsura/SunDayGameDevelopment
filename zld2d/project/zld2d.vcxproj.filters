@@ -75,6 +75,9 @@
     <ClInclude Include="..\include\EnemyComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\TextWriter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\GameApp.cpp">
@@ -108,6 +111,9 @@
       <Filter>ソースファイル</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Enemy.cpp">
+      <Filter>ソースファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\TextWriter.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
   </ItemGroup>
