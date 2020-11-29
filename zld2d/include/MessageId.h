@@ -15,4 +15,7 @@ enum MESSAGE_ID : unsigned int
     MESSAGE_ID_PLAYER_DAMAGE,  // プレイヤーへのダメージ.
     MESSAGE_ID_PLAYER_DEAD,    // プレイヤーのHPが0になったとき.
     MESSAGE_ID_ENEMY_DEAD,     // 敵のHPが0になったとき.
+    MESSAGE_ID_EVENT_START,    // イベント開始.
+    MESSAGE_ID_EVENT_NEXT,     // 次のイベントへ.
+    MESSAGE_ID_EVENT_END,      // イベント終了.
 };

@@ -250,24 +250,24 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
 
     }
 
-    // Direct2D
-    {
-        m_pDeviceContext2D->BeginDraw();
-        m_pDeviceContext2D->SetTarget(m_pBitmap2D.GetPtr());
+    //// Direct2D
+    //{
+    //    m_pDeviceContext2D->BeginDraw();
+    //    m_pDeviceContext2D->SetTarget(m_pBitmap2D.GetPtr());
 
-        wchar_t fps[64] = {};
-        swprintf_s(fps, L"FPS: %f", args.FPS);
+    //    wchar_t fps[64] = {};
+    //    swprintf_s(fps, L"FPS: %f", args.FPS);
 
-        //D2D_RECT_F rect;
-        //rect.left = 0;
-        //rect.right = m_Width;
-        //rect.top = 0;
-        //rect.bottom = m_Height;
-        //m_pDeviceContext2D->DrawText(fps, wcslen(fps), m_pDefaultTextFormat.GetPtr(), &rect, m_pDefaultBrush.GetPtr());
-        m_TextWriter.Draw(m_pDeviceContext2D.GetPtr(), L"てすと", 0, 0);
+    //    //D2D_RECT_F rect;
+    //    //rect.left = 0;
+    //    //rect.right = m_Width;
+    //    //rect.top = 0;
+    //    //rect.bottom = m_Height;
+    //    //m_pDeviceContext2D->DrawText(fps, wcslen(fps), m_pDefaultTextFormat.GetPtr(), &rect, m_pDefaultBrush.GetPtr());
+    //    m_TextWriter.Draw(m_pDeviceContext2D.GetPtr(), L"てすと", 0, 0);
 
-        m_pDeviceContext2D->EndDraw();
-    }
+    //    m_pDeviceContext2D->EndDraw();
+    //}
 
     // 画面に表示.
     Present(1);
