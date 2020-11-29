@@ -211,7 +211,6 @@ void Player::Update(UpdateContext& context)
 
     context.PlayerDir = m_Direction;
 
-
     auto box = m_Box;
     box.Pos.x += int(x * kAdvancedPixel);
     box.Pos.y -= int(y * kAdvancedPixel);
@@ -244,27 +243,6 @@ void Player::Update(UpdateContext& context)
 
 }
 
-//-----------------------------------------------------------------------------
-//      ダメージを設定します.
-//-----------------------------------------------------------------------------
-void Player::OnReceiveDamage(const Message& msg)
-{
-    int damage = *msg.GetBufferAs<int>();
-    if (m_Life > 0)
-    {
-        m_Life -= damage;
-        m_NonDamageFrame = kNonDamageFrame;
-    }
-
-    if (m_Life <= 0)
-    {
-        m_Life = 0;
-
-        // 死亡メッセージを送信.
-        Message msg(MESSAGE_ID_PLAYER_DEAD);
-        SendMsg(msg);
-    }
-}
 
 //-----------------------------------------------------------------------------
 //      スポーンします.
@@ -312,25 +290,28 @@ void Player::Draw(SpriteSystem& sprite)
 void Player::OnScroll(const Message& msg)
 {
     auto dir = *msg.GetBufferAs<uint8_t>();
+    int diffX = (kTileSize * (kTileCountX - 2)) - kCharaScrollX * kScrollFrameX;
+    int diffY = (kTileSize * (kTileCountY - 2)) - kCharaScrollY * kScrollFrameY;
+
     switch(dir)
     {
     case DIRECTION_LEFT:
-        if (m_Scroll.x < kMapMaxiX)
+        if (m_Scroll.x <= kMapMaxiX)
         { m_Scroll.x += kCharaScrollX; }
         break;
 
     case DIRECTION_RIGHT:
-        if (m_Scroll.x > -kMapMaxiX)
+        if (m_Scroll.x >= -kMapMaxiX)
         { m_Scroll.x -= kCharaScrollX; }
         break;
 
     case DIRECTION_UP:
-        if (m_Scroll.y < kMapMaxiY)
+        if (m_Scroll.y <= kMapMaxiY)
         { m_Scroll.y += kCharaScrollY; }
         break;
 
     case DIRECTION_DOWN:
-        if (m_Scroll.y > -kMapMaxiY)
+        if (m_Scroll.y >= -kMapMaxiY)
         { m_Scroll.y -= kCharaScrollY; }
         break;
     }
@@ -390,11 +371,6 @@ void Player::OnReceive(const Message& msg)
 //-----------------------------------------------------------------------------
 void Player::OnScrollComplted()
 {
-    m_Scroll.x  = 0;
-    m_Scroll.y  = 0;
-    m_AnimFrame = 0;
-    m_MapFlag   = 0;
-
     switch(m_Direction)
     {
     case DIRECTION_LEFT:
@@ -412,5 +388,32 @@ void Player::OnScrollComplted()
     case DIRECTION_DOWN:
         m_Box.Pos.y = kMarginY + kTileSize;
         break;
+    }
+
+    m_Scroll.x  = 0;
+    m_Scroll.y  = 0;
+    m_AnimFrame = 0;
+    m_MapFlag   = 0;
+}
+
+//-----------------------------------------------------------------------------
+//      ダメージを設定します.
+//-----------------------------------------------------------------------------
+void Player::OnReceiveDamage(const Message& msg)
+{
+    int damage = *msg.GetBufferAs<int>();
+    if (m_Life > 0)
+    {
+        m_Life -= damage;
+        m_NonDamageFrame = kNonDamageFrame;
+    }
+
+    if (m_Life <= 0)
+    {
+        m_Life = 0;
+
+        // 死亡メッセージを送信.
+        Message msg(MESSAGE_ID_PLAYER_DEAD);
+        SendMsg(msg);
     }
 }

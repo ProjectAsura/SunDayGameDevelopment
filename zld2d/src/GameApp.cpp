@@ -83,7 +83,7 @@ bool GameApp::OnInit()
     auto block = new Block();
     block->SetTilePos(4, 5).SetSize(64, 64).SetSRV(GetGameMap(GAMEMAP_TEXTURE_BLOCK));
     //block->SetDir(DIRECTION_RIGHT);
-    m_Map.AddGimmick(block);
+    m_MapData.Gimmicks.push_back(block);
 
     // テスト用タイルデータ.
     {
@@ -98,7 +98,7 @@ bool GameApp::OnInit()
                 tile.Switchable = false;
                 tile.Scrollable = true;
                 tile.TextureId = GAMEMAP_TEXTURE_PLANE;
-                m_Map.SetTile(id, tile);
+                m_MapData.Tile[id] = tile;
             }
             else if (i == 0 || j == 0 || j == (kTileCountX - 1) || i == (kTileCountY - 1)
                 || (i == 3 && j == 4) || ( i == 8 && j == 11 ))
@@ -108,7 +108,7 @@ bool GameApp::OnInit()
                 tile.Switchable = false;
                 tile.Scrollable = false;
                 tile.TextureId = GAMEMAP_TEXTURE_TREE;
-                m_Map.SetTile(id, tile);
+                m_MapData.Tile[id] = tile;
             }
             else
             {
@@ -117,12 +117,14 @@ bool GameApp::OnInit()
                 tile.Scrollable = false;
                 tile.Switchable = false;
                 tile.TextureId = GAMEMAP_TEXTURE_PLANE;
-                m_Map.SetTile(id, tile);
+                m_MapData.Tile[id] = tile;
             }
 
             id++;
         }
     }
+
+    m_Map.SetData(&m_MapData);
 
     AddEntity(1, &m_Map);
 
@@ -139,7 +141,6 @@ void GameApp::OnTerm()
     m_Hud   .Term();
 
     //m_EnemyTest.Term();
-    m_Map.ClearGimmicks();
 
     EntityMgr::Instance().Clear();
 
@@ -185,6 +186,12 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
 
     m_pDeviceContext->OMSetRenderTargets(1, &pRTV, pDSV);
     m_pDeviceContext->RSSetViewports(1, &m_Viewport);
+
+    D3D11_RECT scissor;
+    scissor.left = kMarginX;
+    scissor.right = kMarginX + kTileTotalW;
+    scissor.top = kMarginY;
+    scissor.bottom = kMarginY + kTileTotalH;
     m_pDeviceContext->RSSetScissorRects(1, &m_ScissorRect);
 
     // スワップチェインに描画.
@@ -199,8 +206,17 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
         m_pDeviceContext->OMSetDepthStencilState(pDSS, 0);
         m_Sprite.Begin(m_pDeviceContext);
 
+        if (!!(m_Map.GetFlags() & GAMEMAP_FLAG_SCROLL))
+        {
+            auto dir = GetMoveDir(m_Player.GetDir());
+            auto pos = Vector2i(kTileTotalW, kTileTotalH) * dir + m_Map.GetScroll();
+            m_MapData.Draw(m_Sprite, pos.x + kMarginX, pos.y + kMarginY);
+        }
+
+
         // マップ描画.
         m_Map.Draw(m_Sprite, m_Player.GetBox().Pos.y);
+
 
         //// 敵描画.
         //m_EnemyTest.Draw(m_Sprite);

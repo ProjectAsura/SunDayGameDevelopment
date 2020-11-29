@@ -34,10 +34,12 @@ static const int     kMarginX           = 32;   // (1280 - kTileSize * kTileCoun
 static const int     kMarginY           = 8;    // (720 - kTileSize * kTileCountY) / 2;
 static const int     kMapScrollX        = 16;
 static const int     kMapScrollY        = 10;
-static const int     kScrollFrameX      = (kMarginX + kTileSize * kTileCountX) / kMapScrollX;
-static const int     kScrollFrameY      = (kMarginY + kTileSize * kTileCountY) / kMapScrollY;
-static const int     kCharaScrollX      = (kMarginX + kTileSize * (kTileCountX - 2)) / kScrollFrameX;
-static const int     kCharaScrollY      = (kMarginY + kTileSize * (kTileCountY - 2)) / kScrollFrameY;
+static const int     kTileTotalW        = kTileSize * kTileCountX;
+static const int     kTileTotalH        = kTileSize * kTileCountY;
+static const int     kScrollFrameX      = kTileTotalW / kMapScrollX;
+static const int     kScrollFrameY      = kTileTotalH / kMapScrollY;
+static const int     kCharaScrollX      = (kTileSize * (kTileCountX - 2)) / kScrollFrameX;
+static const int     kCharaScrollY      = (kTileSize * (kTileCountY - 2)) / kScrollFrameY;
 static const int     kMapMaxiX          = kMarginX + kTileSize * (kTileCountX - 1);
 static const int     kMapMaxiY          = kMarginY + kTileSize * (kTileCountY - 1);
 
@@ -106,6 +108,21 @@ inline uint8_t CalcTileId(const Vector2i& index)
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// GameMapData structure
+///////////////////////////////////////////////////////////////////////////////
+struct GameMapData
+{
+    Tile Tile[kTileCountX * kTileCountY] = {};
+    std::list<Gimmick*> Gimmicks;
+
+    bool Load(const char* path);
+    bool Save(const char* path);
+    void Dispose();
+    void Draw(SpriteSystem& sprite, int offsetX, int offsetY);
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
 // GameMap class
 ///////////////////////////////////////////////////////////////////////////////
 class GameMap : public IEntity
@@ -127,9 +144,9 @@ public:
     ~GameMap();
 
     //-------------------------------------------------------------------------
-    //! @brief      タイルを設定します.
+    //! @brief      マップデータを設定します.
     //-------------------------------------------------------------------------
-    void SetTile(uint8_t id, const Tile& tile);
+    void SetData(GameMapData* value);
 
     //-------------------------------------------------------------------------
     //! @brief      タイルを取得します.
@@ -152,16 +169,6 @@ public:
     bool CanMove(const Box& nextBox);
 
     //-------------------------------------------------------------------------
-    //! @brief      ギミックを追加します.
-    //-------------------------------------------------------------------------
-    void AddGimmick(Gimmick* ptr);
-
-    //-------------------------------------------------------------------------
-    //! @brief      ギミックを破棄します.
-    //-------------------------------------------------------------------------
-    void ClearGimmicks();
-
-    //-------------------------------------------------------------------------
     //! @brief      ギミックの状態をリセットします.
     //-------------------------------------------------------------------------
     void ResetGimmicks();
@@ -176,20 +183,26 @@ public:
     //-------------------------------------------------------------------------
     void OnReceive(const Message& msg) override;
 
+    //-------------------------------------------------------------------------
+    //! @brief      スクロール値を取得します.
+    //-------------------------------------------------------------------------
+    Vector2i GetScroll() const;
+
 private:
     //=========================================================================
     // private variables.
     //=========================================================================
-    Tile                m_Tile[kTileCountX * kTileCountY] = {};
-    std::list<Gimmick*> m_Gimmicks;
-    Vector2i            m_Scroll;
-    uint8_t             m_Flags = 0;
+    GameMapData*    m_Data      = nullptr;
+    Vector2i        m_Scroll    = Vector2i(0, 0);
+    uint8_t         m_Flags     = 0;
+    uint8_t         m_ScrollFrame = 0;
 
     //=========================================================================
     // private methods.
     //=========================================================================
     void Scroll(DIRECTION_STATE dir);
 };
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // GameMapTexture

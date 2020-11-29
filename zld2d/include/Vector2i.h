@@ -33,6 +33,9 @@ struct Vector2i
     Vector2i operator - (const Vector2i& value) const
     { return Vector2i(x - value.x, y - value.y); }
 
+    Vector2i operator * (const Vector2i& value) const
+    { return Vector2i(x * value.x, y * value.y); }
+
     Vector2i operator * (int scale) const
     { return Vector2i(x * scale, y * scale); }
 
@@ -47,6 +50,13 @@ struct Vector2i
     {
         x -= value.x;
         y -= value.y;
+        return *this;
+    }
+
+    Vector2i& operator *= (const Vector2i& value)
+    {
+        x *= value.x;
+        y *= value.y;
         return *this;
     }
 

@@ -42,6 +42,64 @@ static const GameMapPath kGameMapTextures[] = {
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// GameMapData structure
+///////////////////////////////////////////////////////////////////////////////
+
+//-----------------------------------------------------------------------------
+//      ロード処理を行います.
+//-----------------------------------------------------------------------------
+bool GameMapData::Load(const char* path)
+{
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+//      セーブ処理を行います.
+//-----------------------------------------------------------------------------
+bool GameMapData::Save(const char* path)
+{
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+//      破棄処理を行います.
+//-----------------------------------------------------------------------------
+void GameMapData::Dispose()
+{
+}
+
+//-----------------------------------------------------------------------------
+//      描画処理を行います.
+//-----------------------------------------------------------------------------
+void GameMapData::Draw(SpriteSystem& sprite, int offsetX, int offsetY)
+{
+    auto idx = 0;
+    for(auto i=0u; i<kTileCountY; ++i)
+    for(auto j=0u; j<kTileCountX; ++j)
+    {
+        auto tile = Tile[idx];
+        idx++;
+
+        auto pSRV = GetGameMap(tile.TextureId);
+        auto x = int(offsetX + kTileSize * j);
+        auto y = int(offsetY + kTileSize * i);
+
+        sprite.Draw(pSRV, x, y, kTileSize, kTileSize, 2);
+    }
+
+    for(auto& itr : Gimmicks)
+    {
+        auto box  = itr->GetBox();
+        auto pSRV = itr->GetSRV();
+        auto x = int(offsetX + box.Pos.x) - kMarginX;
+        auto y = int(offsetY + box.Pos.y) - kMarginY;
+
+        sprite.Draw(pSRV, x, y, box.Size.x, box.Size.y, 2);
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 // GameMap class
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -56,16 +114,13 @@ GameMap::GameMap()
 //      デストラクタです.
 //-----------------------------------------------------------------------------
 GameMap::~GameMap()
-{ ClearGimmicks(); }
+{ m_Data = nullptr; }
 
 //-----------------------------------------------------------------------------
 //      タイルを設定します.
 //-----------------------------------------------------------------------------
-void GameMap::SetTile(uint8_t id, const Tile& tile)
-{
-    assert(id < kTileTotalCount);
-    m_Tile[id] = tile;
-}
+void GameMap::SetData(GameMapData* value)
+{ m_Data = value; }
 
 //-----------------------------------------------------------------------------
 //      タイルを取得します.
@@ -73,7 +128,7 @@ void GameMap::SetTile(uint8_t id, const Tile& tile)
 Tile GameMap::GetTile(uint8_t id) const
 {
     assert(id < kTileTotalCount);
-    return m_Tile[id];
+    return m_Data->Tile[id];
 }
 
 //-----------------------------------------------------------------------------
@@ -87,7 +142,7 @@ void GameMap::Draw(SpriteSystem& sprite, int playerY)
     for(auto i=0u; i<kTileCountY; ++i)
     for(auto j=0u; j<kTileCountX; ++j)
     {
-        auto tile = m_Tile[idx];
+        auto tile = m_Data->Tile[idx];
         idx++;
 
         auto pSRV = GetGameMap(tile.TextureId);
@@ -106,7 +161,7 @@ void GameMap::Draw(SpriteSystem& sprite, int playerY)
         sprite.Draw(pSRV, x, y, kTileSize, kTileSize, z);
     }
 
-    for(auto& itr : m_Gimmicks)
+    for(auto& itr : m_Data->Gimmicks)
     {
         auto y = itr->GetBox().Pos.y;
 
@@ -127,15 +182,21 @@ bool GameMap::CanMove(const Box& nextBox)
         nextBox.Pos.y + nextBox.Size.y / 2);
     auto id  = CalcTileId(idx);
 
-    if (m_Tile[id].Switchable)
-    { m_Flags |= GAMEMAP_FLAG_SWITCH; }
-    else if (m_Tile[id].Scrollable)
-    { m_Flags |= GAMEMAP_FLAG_SCROLL; }
+    if (m_Data->Tile[id].Switchable)
+    {
+        if (!(m_Flags & GAMEMAP_FLAG_SWITCH))
+        { m_Flags |= GAMEMAP_FLAG_SWITCH; }
+    }
+    else if (m_Data->Tile[id].Scrollable)
+    {
+        if (!(m_Flags & GAMEMAP_FLAG_SCROLL))
+        { m_Flags |= GAMEMAP_FLAG_SCROLL; }
+    }
 
-    if (!m_Tile[id].Moveable)
+    if (!m_Data->Tile[id].Moveable)
     { return false; }
 
-    for(auto& itr : m_Gimmicks)
+    for(auto& itr : m_Data->Gimmicks)
     {
         if (!itr->CanMove(nextBox))
         { return false; }
@@ -160,40 +221,20 @@ void GameMap::Update(UpdateContext& context)
         SendMsg(msg);
     }
 
-    for(auto& itr : m_Gimmicks)
+    for(auto& itr : m_Data->Gimmicks)
     { itr->Update(context); }
 
     if (!!(m_Flags & GAMEMAP_FLAG_SCROLL))
     { Scroll(DIRECTION_STATE(context.PlayerDir)); }
 }
 
-//-----------------------------------------------------------------------------
-//      ギミックを追加します.
-//-----------------------------------------------------------------------------
-void GameMap::AddGimmick(Gimmick* ptr)
-{ m_Gimmicks.push_back(ptr); }
-
-//-----------------------------------------------------------------------------
-//      ギミックを破棄します.
-//-----------------------------------------------------------------------------
-void GameMap::ClearGimmicks()
-{
-    auto itr = m_Gimmicks.begin();
-    while(itr != m_Gimmicks.end())
-    {
-        auto ptr = *itr;
-        delete ptr;
-        itr++;
-    }
-    m_Gimmicks.clear();
-}
 
 //-----------------------------------------------------------------------------
 //      ギミックをリセットします.
 //-----------------------------------------------------------------------------
 void GameMap::ResetGimmicks()
 {
-    for(auto& itr : m_Gimmicks)
+    for(auto& itr : m_Data->Gimmicks)
     { itr->Reset(); }
 }
 
@@ -214,12 +255,14 @@ void GameMap::Scroll(DIRECTION_STATE dir)
     switch(dir)
     {
     case DIRECTION_LEFT:
-        if (m_Scroll.x < kMapMaxiX)
+        if (m_ScrollFrame < kScrollFrameX)
         {
             m_Scroll.x += kMapScrollX;
+            m_ScrollFrame++;
         }
         else
         {
+            m_ScrollFrame = 0;
             m_Scroll.x = 0;
             m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
 
@@ -230,12 +273,14 @@ void GameMap::Scroll(DIRECTION_STATE dir)
         break;
 
     case DIRECTION_RIGHT:
-        if (m_Scroll.x > -kMapMaxiX)
+        if (m_ScrollFrame < kScrollFrameX)
         {
             m_Scroll.x -= kMapScrollX;
+            m_ScrollFrame++;
         }
         else
         {
+            m_ScrollFrame = 0;
             m_Scroll.x = 0;
             m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
 
@@ -246,12 +291,14 @@ void GameMap::Scroll(DIRECTION_STATE dir)
         break;
 
     case DIRECTION_UP:
-        if (m_Scroll.y < kMapMaxiY)
+        if (m_ScrollFrame < kScrollFrameY)
         {
             m_Scroll.y += kMapScrollY;
+            m_ScrollFrame++;
         }
         else
         {
+            m_ScrollFrame = 0;
             m_Scroll.y = 0;
             m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
 
@@ -262,12 +309,14 @@ void GameMap::Scroll(DIRECTION_STATE dir)
         break;
 
     case DIRECTION_DOWN:
-        if (m_Scroll.y > -kMapMaxiY)
+        if (m_ScrollFrame < kScrollFrameY)
         {
             m_Scroll.y -= kMapScrollY;
+            m_ScrollFrame++;
         }
         else
         {
+            m_ScrollFrame = 0;
             m_Scroll.y = 0;
             m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
 
@@ -277,6 +326,7 @@ void GameMap::Scroll(DIRECTION_STATE dir)
         }
         break;
     }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -284,9 +334,30 @@ void GameMap::Scroll(DIRECTION_STATE dir)
 //-----------------------------------------------------------------------------
 void GameMap::OnReceive(const Message& msg)
 {
-    for(auto& itr : m_Gimmicks)
+    switch(msg.GetType())
+    {
+    case MESSAGE_ID_MAP_SCROLL:
+        { m_Flags |= GAMEMAP_FLAG_SCROLL; }
+        break;
+
+    case MESSAGE_ID_MAP_SWITCH:
+        { m_Flags |= GAMEMAP_FLAG_SWITCH; }
+        break;
+
+    default:
+        break;
+    }
+
+    for(auto& itr : m_Data->Gimmicks)
     { itr->OnReceive(msg); }
 }
+
+//-----------------------------------------------------------------------------
+//      スクロール値を取得します.
+//-----------------------------------------------------------------------------
+Vector2i GameMap::GetScroll() const
+{ return m_Scroll; }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // GameMapTextureMgr class

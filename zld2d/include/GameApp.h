@@ -52,6 +52,7 @@ private:
     GameMap             m_Map;
     //EnemyTest           m_EnemyTest;
     Hud                 m_Hud;
+    GameMapData         m_MapData;
 
     //=========================================================================
     // private methods.
