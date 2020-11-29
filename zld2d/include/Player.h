@@ -126,7 +126,7 @@ private:
     asdx::Texture2D     m_WeaponTexture[4];
     int                 m_NonDamageFrame = 0;
     uint8_t             m_Flags         = 0;
-    Vector2i            m_Scroll        = {};
+    asdx::Vector2       m_Scroll        = asdx::Vector2(0.0f, 0.0f);
     uint8_t             m_MapFlag       = 0;
 
     //=========================================================================

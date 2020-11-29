@@ -148,8 +148,8 @@ void GameMap::Draw(SpriteSystem& sprite, int playerY)
         auto pSRV = GetGameMap(tile.TextureId);
         auto step = (float)(j) / kTileCountX;
 
-        auto x = int(kMarginX + kTileSize * j) + m_Scroll.x;
-        auto y = int(kMarginY + kTileSize * i) + m_Scroll.y;
+        auto x = int(kMarginX + kTileSize * j) + int(m_Scroll.x);
+        auto y = int(kMarginY + kTileSize * i) + int(m_Scroll.y);
 
         // キャラよりもY座標が下側なら手前に表示されるように調整.
         auto condition = !tile.Moveable && (playerY < 0);
@@ -249,84 +249,44 @@ uint8_t GameMap::GetFlags() const
 //-----------------------------------------------------------------------------
 void GameMap::Scroll(DIRECTION_STATE dir)
 {
-    static const int kMaxiX = kMarginX + kTileSize * kTileCountX;
-    static const int kMaxiY = kMarginY + kTileSize * kTileCountY;
+    if (m_ScrollFrame < kScrollFrame)
+    {
+        m_ScrollFrame++;
+    }
+    else
+    {
+        // リセット.
+        m_ScrollFrame = 0;
+        m_Scroll.x    = 0;
+        m_Scroll.y    = 0;
+
+        // フラグをおろす.
+        m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
+
+        // 完了メッセージを送信.
+        Message msg(MESSAGE_ID_MAP_CHANGED);
+        SendMsg(msg);
+        return;
+    }
 
     switch(dir)
     {
     case DIRECTION_LEFT:
-        if (m_ScrollFrame < kScrollFrameX)
-        {
-            m_Scroll.x += kMapScrollX;
-            m_ScrollFrame++;
-        }
-        else
-        {
-            m_ScrollFrame = 0;
-            m_Scroll.x = 0;
-            m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
-
-            // 完了メッセージを送信.
-            Message msg(MESSAGE_ID_MAP_CHANGED);
-            SendMsg(msg);
-        }
+        { m_Scroll.x += kMapScrollX; }
         break;
 
     case DIRECTION_RIGHT:
-        if (m_ScrollFrame < kScrollFrameX)
-        {
-            m_Scroll.x -= kMapScrollX;
-            m_ScrollFrame++;
-        }
-        else
-        {
-            m_ScrollFrame = 0;
-            m_Scroll.x = 0;
-            m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
-
-            // 完了メッセージを送信.
-            Message msg(MESSAGE_ID_MAP_CHANGED);
-            SendMsg(msg);
-        }
+        { m_Scroll.x -= kMapScrollX; }
         break;
 
     case DIRECTION_UP:
-        if (m_ScrollFrame < kScrollFrameY)
-        {
-            m_Scroll.y += kMapScrollY;
-            m_ScrollFrame++;
-        }
-        else
-        {
-            m_ScrollFrame = 0;
-            m_Scroll.y = 0;
-            m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
-
-            // 完了メッセージを送信.
-            Message msg(MESSAGE_ID_MAP_CHANGED);
-            SendMsg(msg);
-        }
+        { m_Scroll.y += kMapScrollY; }
         break;
 
     case DIRECTION_DOWN:
-        if (m_ScrollFrame < kScrollFrameY)
-        {
-            m_Scroll.y -= kMapScrollY;
-            m_ScrollFrame++;
-        }
-        else
-        {
-            m_ScrollFrame = 0;
-            m_Scroll.y = 0;
-            m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
-
-            // 完了メッセージを送信.
-            Message msg(MESSAGE_ID_MAP_CHANGED);
-            SendMsg(msg);
-        }
+        { m_Scroll.y -= kMapScrollY; }
         break;
     }
-
 }
 
 //-----------------------------------------------------------------------------
@@ -356,7 +316,7 @@ void GameMap::OnReceive(const Message& msg)
 //      スクロール値を取得します.
 //-----------------------------------------------------------------------------
 Vector2i GameMap::GetScroll() const
-{ return m_Scroll; }
+{ return Vector2i(int(m_Scroll.x), int(m_Scroll.y)); }
 
 
 ///////////////////////////////////////////////////////////////////////////////

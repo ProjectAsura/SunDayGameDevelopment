@@ -97,7 +97,7 @@ protected:
     Box                         m_Box;
     ID3D11ShaderResourceView*   m_pSRV   = nullptr;
     uint8_t                     m_Flags  = 0;
-    Vector2i                    m_Scroll = {};
+    asdx::Vector2               m_Scroll = asdx::Vector2(0.0f, 0.0f);
 
     //=========================================================================
     // protected methods.

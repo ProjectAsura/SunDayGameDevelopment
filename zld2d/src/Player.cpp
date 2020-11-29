@@ -271,7 +271,8 @@ void Player::Draw(SpriteSystem& sprite)
         auto id   = GetPlayerId(m_Action, m_Direction, m_AnimFrame);
         auto pSRV = m_PlayerTexture[id].GetSRV();
         auto box  = m_Box;
-        box.Pos += m_Scroll;
+        box.Pos.x += int(m_Scroll.x);
+        box.Pos.y += int(m_Scroll.y);
 
         sprite.Draw(pSRV, box, 1);
     }
@@ -290,31 +291,26 @@ void Player::Draw(SpriteSystem& sprite)
 void Player::OnScroll(const Message& msg)
 {
     auto dir = *msg.GetBufferAs<uint8_t>();
-    int diffX = (kTileSize * (kTileCountX - 2)) - kCharaScrollX * kScrollFrameX;
-    int diffY = (kTileSize * (kTileCountY - 2)) - kCharaScrollY * kScrollFrameY;
 
     switch(dir)
     {
     case DIRECTION_LEFT:
-        if (m_Scroll.x <= kMapMaxiX)
         { m_Scroll.x += kCharaScrollX; }
         break;
 
     case DIRECTION_RIGHT:
-        if (m_Scroll.x >= -kMapMaxiX)
         { m_Scroll.x -= kCharaScrollX; }
         break;
 
     case DIRECTION_UP:
-        if (m_Scroll.y <= kMapMaxiY)
         { m_Scroll.y += kCharaScrollY; }
         break;
 
     case DIRECTION_DOWN:
-        if (m_Scroll.y >= -kMapMaxiY)
         { m_Scroll.y -= kCharaScrollY; }
         break;
     }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -344,21 +340,15 @@ void Player::OnReceive(const Message& msg)
     switch(msg.GetType())
     {
     case MESSAGE_ID_PLAYER_DAMAGE:
-        {
-            OnReceiveDamage(msg);
-        }
+        { OnReceiveDamage(msg); }
         break;
 
     case MESSAGE_ID_MAP_SCROLL:
-        {
-            OnScroll(msg);
-        }
+        { OnScroll(msg); }
         break;
 
     case MESSAGE_ID_MAP_CHANGED:
-        {
-            OnScrollComplted();
-        }
+        { OnScrollComplted(); }
         break;
 
     default:

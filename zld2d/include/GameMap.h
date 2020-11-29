@@ -32,14 +32,13 @@ static const uint8_t kTileTotalCount    = kTileCountX * kTileCountY;
 static const uint8_t kTileSize          = 64;
 static const int     kMarginX           = 32;   // (1280 - kTileSize * kTileCountX) / 2;
 static const int     kMarginY           = 8;    // (720 - kTileSize * kTileCountY) / 2;
-static const int     kMapScrollX        = 16;
-static const int     kMapScrollY        = 10;
 static const int     kTileTotalW        = kTileSize * kTileCountX;
 static const int     kTileTotalH        = kTileSize * kTileCountY;
-static const int     kScrollFrameX      = kTileTotalW / kMapScrollX;
-static const int     kScrollFrameY      = kTileTotalH / kMapScrollY;
-static const int     kCharaScrollX      = (kTileSize * (kTileCountX - 2)) / kScrollFrameX;
-static const int     kCharaScrollY      = (kTileSize * (kTileCountY - 2)) / kScrollFrameY;
+static const int     kScrollFrame       = 64;   // kTileSizeを割り切れる値に設定.
+static const float   kMapScrollX        = float(kTileTotalW) / float(kScrollFrame);
+static const float   kMapScrollY        = float(kTileTotalH) / float(kScrollFrame);
+static const float   kCharaScrollX      = float(kTileSize * (kTileCountX - 2) - kTileSize / 2) / float(kScrollFrame);   // 左右1タイル分を除く + 半キャラ分補正.
+static const float   kCharaScrollY      = float(kTileSize * (kTileCountY - 2) - kTileSize / 2) / float(kScrollFrame);   // 上下1タイル分を除く + 半キャラ分補正.
 static const int     kMapMaxiX          = kMarginX + kTileSize * (kTileCountX - 1);
 static const int     kMapMaxiY          = kMarginY + kTileSize * (kTileCountY - 1);
 
@@ -193,7 +192,7 @@ private:
     // private variables.
     //=========================================================================
     GameMapData*    m_Data      = nullptr;
-    Vector2i        m_Scroll    = Vector2i(0, 0);
+    asdx::Vector2   m_Scroll    = asdx::Vector2(0.0f, 0.0f);
     uint8_t         m_Flags     = 0;
     uint8_t         m_ScrollFrame = 0;
 

@@ -187,12 +187,12 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
     m_pDeviceContext->OMSetRenderTargets(1, &pRTV, pDSV);
     m_pDeviceContext->RSSetViewports(1, &m_Viewport);
 
-    D3D11_RECT scissor;
-    scissor.left = kMarginX;
-    scissor.right = kMarginX + kTileTotalW;
-    scissor.top = kMarginY;
-    scissor.bottom = kMarginY + kTileTotalH;
-    m_pDeviceContext->RSSetScissorRects(1, &m_ScissorRect);
+    D3D11_RECT scissor = {};
+    scissor.left    = kMarginX;
+    scissor.right   = kMarginX + kTileTotalW;
+    scissor.top     = kMarginY;
+    scissor.bottom  = kMarginY + kTileTotalH;
+    m_pDeviceContext->RSSetScissorRects(1, &scissor);
 
     // スワップチェインに描画.
     {
@@ -206,13 +206,13 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
         m_pDeviceContext->OMSetDepthStencilState(pDSS, 0);
         m_Sprite.Begin(m_pDeviceContext);
 
+        // 次のマップをスクロールしながら表示.
         if (!!(m_Map.GetFlags() & GAMEMAP_FLAG_SCROLL))
         {
             auto dir = GetMoveDir(m_Player.GetDir());
             auto pos = Vector2i(kTileTotalW, kTileTotalH) * dir + m_Map.GetScroll();
             m_MapData.Draw(m_Sprite, pos.x + kMarginX, pos.y + kMarginY);
         }
-
 
         // マップ描画.
         m_Map.Draw(m_Sprite, m_Player.GetBox().Pos.y);

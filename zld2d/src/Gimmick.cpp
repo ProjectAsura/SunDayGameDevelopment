@@ -70,8 +70,8 @@ void Gimmick::Draw(SpriteSystem& sprite, int layer)
 { 
     sprite.Draw(
         m_pSRV,
-        m_Box.Pos.x + m_Scroll.x,
-        m_Box.Pos.y + m_Scroll.y,
+        m_Box.Pos.x + int(m_Scroll.x),
+        m_Box.Pos.y + int(m_Scroll.y),
         m_Box.Size.x,
         m_Box.Size.y,
         layer);
