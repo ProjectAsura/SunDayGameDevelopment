@@ -50,6 +50,7 @@ static const GameMapPath kGameMapTextures[] = {
 //-----------------------------------------------------------------------------
 bool GameMapData::Load(const char* path)
 {
+    // TODO : Implementation.
     return true;
 }
 
@@ -58,6 +59,7 @@ bool GameMapData::Load(const char* path)
 //-----------------------------------------------------------------------------
 bool GameMapData::Save(const char* path)
 {
+    // TODO : Implmenetation.
     return true;
 }
 
@@ -66,6 +68,7 @@ bool GameMapData::Save(const char* path)
 //-----------------------------------------------------------------------------
 void GameMapData::Dispose()
 {
+    // TODO : Implementation.
 }
 
 //-----------------------------------------------------------------------------
@@ -73,6 +76,7 @@ void GameMapData::Dispose()
 //-----------------------------------------------------------------------------
 void GameMapData::Draw(SpriteSystem& sprite, int offsetX, int offsetY)
 {
+    // この描画処理はマップ切り替えでスクロールインするための専用処理です.
     auto idx = 0;
     for(auto i=0u; i<kTileCountY; ++i)
     for(auto j=0u; j<kTileCountX; ++j)
@@ -87,6 +91,8 @@ void GameMapData::Draw(SpriteSystem& sprite, int offsetX, int offsetY)
         sprite.Draw(pSRV, x, y, kTileSize, kTileSize, 2);
     }
 
+    // ギミックはオフセットを考慮した配置になっているので，
+    // スクロールさせるためにオフセット分を差し引く必要あり.
     for(auto& itr : Gimmicks)
     {
         auto box  = itr->GetBox();
@@ -171,6 +177,8 @@ void GameMap::Draw(SpriteSystem& sprite, int playerY)
 //-----------------------------------------------------------------------------
 bool GameMap::CanMove(const Box& nextBox)
 {
+    // 半キャラ分の可動を許した方が可動領域が広くて操作しやすかったので，
+    // 半キャラ分許容する.
     auto idx = CalcTileIndex(
         nextBox.Pos.x + nextBox.Size.x / 2,
         nextBox.Pos.y + nextBox.Size.y / 2);
@@ -178,24 +186,29 @@ bool GameMap::CanMove(const Box& nextBox)
 
     if (m_Data->Tile[id].Switchable)
     {
+        // 最初の一回だけフラグを立てたいから.
         if (!(m_Flags & GAMEMAP_FLAG_SWITCH))
         { m_Flags |= GAMEMAP_FLAG_SWITCH; }
     }
     else if (m_Data->Tile[id].Scrollable)
     {
+        // 最初の一回だけフラグを立てたいから.
         if (!(m_Flags & GAMEMAP_FLAG_SCROLL))
         { m_Flags |= GAMEMAP_FLAG_SCROLL; }
     }
 
+    // 移動しちゃダメなタイルなら処理終了.
     if (!m_Data->Tile[id].Moveable)
     { return false; }
 
+    // 移動できないものがあるかどうかチェック.
     for(auto& itr : m_Data->Gimmicks)
     {
         if (!itr->CanMove(nextBox))
         { return false; }
     }
 
+    // 移動してOK!
     return true;
 }
 
@@ -260,6 +273,8 @@ void GameMap::Scroll(DIRECTION_STATE dir)
         // 完了メッセージを送信.
         Message msg(MESSAGE_ID_MAP_CHANGED);
         SendMsg(msg);
+
+        // おしまい.
         return;
     }
 
