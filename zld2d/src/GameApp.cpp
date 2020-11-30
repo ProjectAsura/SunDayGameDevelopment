@@ -129,7 +129,7 @@ bool GameApp::OnInit()
     AddEntity(1, &m_Map);
 
 
-    if (!m_TextWriter.Init(m_pFactoryDW.GetPtr(), m_pDeviceContext2D.GetPtr(), L"../res/font/07やさしさゴシック.ttf", 32))
+    if (!m_TextWriter.Init(m_pFactoryDW.GetPtr(), m_pDeviceContext2D.GetPtr(), L"しねきゃぷしょん", 32))
     {
         ELOG("Error : TextWriter::Init() Failed.");
         return false;
@@ -212,6 +212,11 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
     m_pDeviceContext->RSSetViewports(1, &viewport);
     m_pDeviceContext->RSSetScissorRects(1, &scissor);
 
+    auto upper = (m_Player.GetBox().Pos.y >= 424);
+
+    // 会話メッセージを表示する場合.
+    auto showMsg = true;
+
     // スワップチェインに描画.
     {
         auto pSmp = asdx::RenderState::GetInstance().GetSmp(asdx::SamplerType::LinearClamp);
@@ -246,28 +251,26 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
         // UI描画.
         m_Hud.Draw(m_Sprite, m_Player);
 
+        // メッセージウィンドウ枠表示.
+        if (showMsg)
+        { m_Hud.DrawWnd(m_Sprite, upper); }
+
         m_Sprite.End(m_pDeviceContext);
 
     }
 
-    //// Direct2D
-    //{
-    //    m_pDeviceContext2D->BeginDraw();
-    //    m_pDeviceContext2D->SetTarget(m_pBitmap2D.GetPtr());
+    // メッセージ描画.
+    if (showMsg)
+    {
+        auto context = m_pDeviceContext2D.GetPtr();
+        context->BeginDraw();
+        context->SetTarget(m_pBitmap2D.GetPtr());
 
-    //    wchar_t fps[64] = {};
-    //    swprintf_s(fps, L"FPS: %f", args.FPS);
+        m_TextWriter.SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+        m_TextWriter.DrawLine(context, L"1行目\n2行目\n3行目\n4行目\n5行目", 0, upper);
 
-    //    //D2D_RECT_F rect;
-    //    //rect.left = 0;
-    //    //rect.right = m_Width;
-    //    //rect.top = 0;
-    //    //rect.bottom = m_Height;
-    //    //m_pDeviceContext2D->DrawText(fps, wcslen(fps), m_pDefaultTextFormat.GetPtr(), &rect, m_pDefaultBrush.GetPtr());
-    //    m_TextWriter.Draw(m_pDeviceContext2D.GetPtr(), L"てすと", 0, 0);
-
-    //    m_pDeviceContext2D->EndDraw();
-    //}
+        m_pDeviceContext2D->EndDraw();
+    }
 
     // 画面に表示.
     Present(1);

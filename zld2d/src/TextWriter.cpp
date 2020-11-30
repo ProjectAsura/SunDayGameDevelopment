@@ -7,6 +7,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
+#include <cassert>
 #include <TextWriter.h>
 #include <asdxLogger.h>
 
@@ -105,8 +106,40 @@ void TextWriter::Draw(ID2D1DeviceContext* pContext, const wchar_t* text, float x
     D2D_RECT_F rect = {};
     rect.left   = x;
     rect.top    = y;
-    rect.right  = m_FontSize * 2.0f * length;
-    rect.bottom = m_FontSize;
+    rect.right  = x + m_FontSize * 2.0f * length;
+    rect.bottom = y + m_FontSize;
 
+    // 左寄せ.
+    m_Format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
     pContext->DrawText(text, length, m_Format.GetPtr(), &rect, m_Brush.GetPtr());
 }
+
+//-----------------------------------------------------------------------------
+//      テキストを描画します.
+//-----------------------------------------------------------------------------
+void TextWriter::DrawLine(ID2D1DeviceContext* pContext, const wchar_t* text, int line, bool upper)
+{
+    assert(0 <= line && line < 4);
+    UINT length = UINT(wcslen(text));
+
+    static const float kW = 958.0f;
+    static const float kH = 42.0f; // 32文字サイズ + 10px上下間隔.
+    static const float kX = 182.0f;
+    const float kY = (upper) ? 86.0f : 504.0f;
+
+    D2D_RECT_F rect = {};
+    rect.left   = kX;
+    rect.top    = kY + line * kH;
+    rect.right  = kX + kW;
+    rect.bottom = kY + m_FontSize + line * kH;
+
+    // 中央寄せ
+    m_Format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+    pContext->DrawText(text, length, m_Format.GetPtr(), &rect, m_Brush.GetPtr());
+}
+
+//-----------------------------------------------------------------------------
+//      フォントサイズを取得します.
+//-----------------------------------------------------------------------------
+float TextWriter::GetFontSize() const
+{ return m_FontSize; }

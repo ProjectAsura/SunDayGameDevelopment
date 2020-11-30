@@ -12,6 +12,7 @@
 #include <Player.h>
 
 
+
 ///////////////////////////////////////////////////////////////////////////////
 // Hud class
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,6 +37,7 @@ public:
     bool Init();
     void Term();
     void Draw(SpriteSystem& sprite, const Player& player);
+    void DrawWnd(SpriteSystem& sprite, bool upper = false);
 
 private:
     ///////////////////////////////////////////////////////////////////////////////
@@ -46,6 +48,7 @@ private:
         HUD_TEXTURE_LIFE_FULL,  // 満☆
         HUD_TEXTURE_LIFE_LACK,  // 欠☆
         HUD_TEXTURE_WHITE,      // 無地.
+        HUD_TEXTURE_WINDOW,     // メッセージウィンドウ.
 
         HUD_TEXTURE_COUNT
     };

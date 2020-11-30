@@ -25,6 +25,7 @@ static const char* kTextures[] = {
     "../res/texture/hud/star_full.tga",
     "../res/texture/hud/star_lack.tga",
     "../res/texture/hud/white.tga",
+    "../res/texture/hud/wnd.tga",
 };
 
 
@@ -105,4 +106,21 @@ void Hud::Draw(SpriteSystem& sprite, const Player& player)
         }
     }
 
+}
+
+//-----------------------------------------------------------------------------
+//      メッセージウィンドウの枠を描画します.
+//-----------------------------------------------------------------------------
+void Hud::DrawWnd(SpriteSystem& sprite, bool upper)
+{
+    static const int kW = 1000;
+    static const int kH = 200;
+
+    static const int kX = 140;
+    int kY = (upper) ? 64 : 488;
+
+    sprite.SetColor(0.75f, 0.75f, 0.75f, 0.75f);
+    sprite.Draw(
+        m_Texture[HUD_TEXTURE_WINDOW].GetSRV(),
+        kX, kY, kW, kH, 0);
 }
