@@ -16,7 +16,7 @@
 #include <SpriteSystem.h>
 #include <Box.h>
 #include <TextureHelper.h>
-#include <Entity.h>
+#include <MessageMgr.h>
 
 
 //-----------------------------------------------------------------------------
@@ -39,7 +39,7 @@ struct IEnemyComponent
 ///////////////////////////////////////////////////////////////////////////////
 // Enemy class
 ///////////////////////////////////////////////////////////////////////////////
-class Enemy : public IEntity
+class Enemy : public IMessageListener
 {
     //=========================================================================
     // list of friend classes and methods.

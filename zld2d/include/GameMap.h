@@ -15,7 +15,7 @@
 #include <DirectionState.h>
 #include <UpdateContext.h>
 #include <Box.h>
-#include <Entity.h>
+#include <MessageMgr.h>
 
 
 //-----------------------------------------------------------------------------
@@ -137,7 +137,7 @@ struct GameMapData
 ///////////////////////////////////////////////////////////////////////////////
 // GameMap class
 ///////////////////////////////////////////////////////////////////////////////
-class GameMap : public IEntity
+class GameMap : public IMessageListener
 {
     //=========================================================================
     // list of friend classes and methods.
@@ -193,7 +193,7 @@ public:
     //-------------------------------------------------------------------------
     //! @brief      メッセージ受信処理を行います.
     //-------------------------------------------------------------------------
-    void OnReceive(const Message& msg) override;
+    void OnMessage(const Message& msg) override;
 
     //-------------------------------------------------------------------------
     //! @brief      スクロール値を取得します.

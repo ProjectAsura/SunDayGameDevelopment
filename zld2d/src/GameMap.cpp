@@ -114,13 +114,17 @@ void GameMapData::Draw(SpriteSystem& sprite, int offsetX, int offsetY)
 //-----------------------------------------------------------------------------
 GameMap::GameMap()
 {
+    MessageMgr::Instance().Add(this);
 }
 
 //-----------------------------------------------------------------------------
 //      デストラクタです.
 //-----------------------------------------------------------------------------
 GameMap::~GameMap()
-{ m_Data = nullptr; }
+{
+    m_Data = nullptr;
+    MessageMgr::Instance().Remove(this);
+}
 
 //-----------------------------------------------------------------------------
 //      タイルを設定します.
@@ -301,7 +305,7 @@ void GameMap::Scroll(DIRECTION_STATE dir)
 //-----------------------------------------------------------------------------
 //      メッセージ受信処理を行います.
 //-----------------------------------------------------------------------------
-void GameMap::OnReceive(const Message& msg)
+void GameMap::OnMessage(const Message& msg)
 {
     switch(msg.GetType())
     {
@@ -316,9 +320,6 @@ void GameMap::OnReceive(const Message& msg)
     default:
         break;
     }
-
-    for(auto& itr : m_Data->Gimmicks)
-    { itr->OnReceive(msg); }
 }
 
 //-----------------------------------------------------------------------------

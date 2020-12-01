@@ -14,7 +14,7 @@
 #include <UpdateContext.h>
 #include <DirectionState.h>
 #include <Box.h>
-#include <Entity.h>
+#include <MessageMgr.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,7 @@ enum PLAYER_ACTION
 ///////////////////////////////////////////////////////////////////////////////
 // Player class
 ///////////////////////////////////////////////////////////////////////////////
-class Player : public IEntity
+class Player : public IMessageListener
 {
     //=========================================================================
     // list of friend classes and methods.
@@ -108,7 +108,7 @@ public:
     //-------------------------------------------------------------------------
     //! @brief      メッセージ受信処理です.
     //-------------------------------------------------------------------------
-    void OnReceive(const Message& msg) override;
+    void OnMessage(const Message& msg) override;
 
 private:
     //=========================================================================

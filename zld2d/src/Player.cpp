@@ -15,6 +15,7 @@
 #include <GameMap.h>
 #include <Vector2i.h>
 #include <MessageId.h>
+#include <MessageMgr.h>
 
 
 namespace {
@@ -88,8 +89,7 @@ int GetPlayerId(int state, int dir, int frame)
 Player::Player()
 : m_Box     (0, 0, kSize, kSize)
 , m_HitBox  (0, 0, kSize, kSize)
-{
-}
+{ /* DO_NOTHING */ }
 
 //-----------------------------------------------------------------------------
 //      デストラクタです.
@@ -116,6 +116,7 @@ bool Player::Init()
 
     SetTilePos(3, 5);
 
+    MessageMgr::Instance().Add(this);
     return true;
 }
 
@@ -124,6 +125,8 @@ bool Player::Init()
 //-----------------------------------------------------------------------------
 void Player::Term()
 {
+    MessageMgr::Instance().Remove(this);
+
     for(auto i=0; i<12; ++i)
     { m_PlayerTexture[i].Release(); }
 
@@ -290,7 +293,7 @@ void Player::Draw(SpriteSystem& sprite)
 //-----------------------------------------------------------------------------
 void Player::OnScroll(const Message& msg)
 {
-    auto dir = *msg.GetBufferAs<uint8_t>();
+    auto dir = *msg.GetAs<uint8_t>();
 
     switch(dir)
     {
@@ -335,7 +338,7 @@ void Player::SetTilePos(int tileX, int tileY)
 //-----------------------------------------------------------------------------
 //      メッセージの受信処理を行います.
 //-----------------------------------------------------------------------------
-void Player::OnReceive(const Message& msg)
+void Player::OnMessage(const Message& msg)
 {
     switch(msg.GetType())
     {
@@ -391,7 +394,7 @@ void Player::OnScrollComplted()
 //-----------------------------------------------------------------------------
 void Player::OnReceiveDamage(const Message& msg)
 {
-    int damage = *msg.GetBufferAs<int>();
+    int damage = *msg.GetAs<int>();
     if (m_Life > 0)
     {
         m_Life -= damage;

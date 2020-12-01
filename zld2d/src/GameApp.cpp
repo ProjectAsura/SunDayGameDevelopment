@@ -64,8 +64,6 @@ bool GameApp::OnInit()
         return false;
     }
 
-    AddEntity(0, &m_Player);
-
     // HUD初期化.
     if (!m_Hud.Init())
     {
@@ -126,9 +124,6 @@ bool GameApp::OnInit()
 
     m_Map.SetData(&m_MapData);
 
-    AddEntity(1, &m_Map);
-
-
     if (!m_TextWriter.Init(m_pFactoryDW.GetPtr(), m_pDeviceContext2D.GetPtr(), L"しねきゃぷしょん", 32))
     {
         ELOG("Error : TextWriter::Init() Failed.");
@@ -151,9 +146,8 @@ void GameApp::OnTerm()
 
     m_TextWriter.Term();
 
-    EntityMgr::Instance().Clear();
-
     GameMapTextureMgr::Instance().Term();
+
 }
 
 //-----------------------------------------------------------------------------

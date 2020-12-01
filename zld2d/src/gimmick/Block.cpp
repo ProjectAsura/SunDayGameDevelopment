@@ -125,7 +125,7 @@ void Block::Update(UpdateContext& context)
 //-----------------------------------------------------------------------------
 //      メッセージ受信処理を行います.
 //-----------------------------------------------------------------------------
-void Block::OnReceive(const Message& msg)
+void Block::OnMessage(const Message& msg)
 {
     switch(msg.GetType())
     {

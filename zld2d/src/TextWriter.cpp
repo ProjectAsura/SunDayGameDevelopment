@@ -123,7 +123,7 @@ void TextWriter::DrawLine(ID2D1DeviceContext* pContext, const wchar_t* text, int
     UINT length = UINT(wcslen(text));
 
     static const float kW = 958.0f;
-    static const float kH = 42.0f; // 32文字サイズ + 10px上下間隔.
+    static const float kH = 42.0f; // 32px文字サイズ + 10px上下間隔.
     static const float kX = 182.0f;
     const float kY = (upper) ? 86.0f : 504.0f;
 
