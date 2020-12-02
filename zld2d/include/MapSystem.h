@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------------
 // File : MapSystem.h
-// Desc : Game Map System.
+// Desc : System for Game Map.
 // Copyright(c) Project Asura. All right reserved.
 //-----------------------------------------------------------------------------
 #pragma once

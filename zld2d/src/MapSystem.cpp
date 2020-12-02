@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------------
 // File : MapSystem.cpp
-// Desc : Game Map System.
+// Desc : System for Game Map.
 // Copyright(c) Project Asura. All right reserved.
 //-----------------------------------------------------------------------------
 
@@ -15,31 +15,6 @@
 #include <MessageId.h>
 #include <TextureMgr.h>
 
-
-#if 0
-namespace {
-
-///////////////////////////////////////////////////////////////////////////////
-// GameMapPath structure
-///////////////////////////////////////////////////////////////////////////////
-struct GameMapPath
-{
-    GAMEMAP_TEXTURE     Type;   // ゲームテクスチャ番号.
-    const char*         Path;   // ファイルパス.
-};
-
-//-----------------------------------------------------------------------------
-// Constant Values.
-//-----------------------------------------------------------------------------
-static const GameMapPath kGameMapTextures[] = {
-    { GAMEMAP_TEXTURE_PLANE, "../res/texture/map/plane.tga" },
-    { GAMEMAP_TEXTURE_ROCK,  "../res/texture/map/rock.tga" },
-    { GAMEMAP_TEXTURE_TREE,  "../res/texture/map/tree.tga" },
-    { GAMEMAP_TEXTURE_BLOCK, "../res/texture/map/block.tga" },
-};
-
-} // namemap
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // MapInstance structure

@@ -94,6 +94,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Box.h" />
+    <ClInclude Include="..\include\EventSystem.h" />
     <ClInclude Include="..\include\DirectionState.h" />
     <ClInclude Include="..\include\Enemy.h" />
     <ClInclude Include="..\include\GameApp.h" />
@@ -113,6 +114,7 @@
     <ClInclude Include="..\include\Vector2i.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\EventSystem.cpp" />
     <ClCompile Include="..\src\Enemy.cpp" />
     <ClCompile Include="..\src\GameApp.cpp" />
     <ClCompile Include="..\src\MapSystem.cpp" />

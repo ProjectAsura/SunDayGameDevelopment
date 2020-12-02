@@ -15,7 +15,6 @@
 #include <UpdateContext.h>
 #include <SpriteSystem.h>
 #include <Box.h>
-#include <TextureHelper.h>
 #include <MessageMgr.h>
 
 

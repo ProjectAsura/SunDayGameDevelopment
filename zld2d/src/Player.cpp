@@ -8,7 +8,6 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include <Player.h>
-#include <TextureHelper.h>
 #include <asdxRenderState.h>
 #include <asdxLogger.h>
 #include <asdxHid.h>
