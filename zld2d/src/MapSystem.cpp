@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------------
-// File : GameMap.cpp
-// Desc : Game Map.
+// File : MapSystem.cpp
+// Desc : Game Map System.
 // Copyright(c) Project Asura. All right reserved.
 //-----------------------------------------------------------------------------
 
@@ -8,15 +8,15 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include <cassert>
-#include <GameMap.h>
-#include <Vector2i.h>
-#include <TextureHelper.h>
+#include <MapSystem.h>
 #include <asdxLogger.h>
 #include <Gimmick.h>
 #include <Player.h>
 #include <MessageId.h>
+#include <TextureMgr.h>
 
 
+#if 0
 namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,16 +39,16 @@ static const GameMapPath kGameMapTextures[] = {
 };
 
 } // namemap
-
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
-// GameMapData structure
+// MapInstance structure
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
 //      ロード処理を行います.
 //-----------------------------------------------------------------------------
-bool GameMapData::Load(const char* path)
+bool MapInstance::Load(const char* path)
 {
     // TODO : Implementation.
     return true;
@@ -57,7 +57,7 @@ bool GameMapData::Load(const char* path)
 //-----------------------------------------------------------------------------
 //      セーブ処理を行います.
 //-----------------------------------------------------------------------------
-bool GameMapData::Save(const char* path)
+bool MapInstance::Save(const char* path)
 {
     // TODO : Implmenetation.
     return true;
@@ -66,53 +66,20 @@ bool GameMapData::Save(const char* path)
 //-----------------------------------------------------------------------------
 //      破棄処理を行います.
 //-----------------------------------------------------------------------------
-void GameMapData::Dispose()
+void MapInstance::Dispose()
 {
     // TODO : Implementation.
 }
 
-//-----------------------------------------------------------------------------
-//      描画処理を行います.
-//-----------------------------------------------------------------------------
-void GameMapData::Draw(SpriteSystem& sprite, int offsetX, int offsetY)
-{
-    // この描画処理はマップ切り替えでスクロールインするための専用処理です.
-    auto idx = 0;
-    for(auto i=0u; i<kTileCountY; ++i)
-    for(auto j=0u; j<kTileCountX; ++j)
-    {
-        auto tile = Tile[idx];
-        idx++;
-
-        auto pSRV = GetGameMap(tile.TextureId);
-        auto x = int(offsetX + kTileSize * j);
-        auto y = int(offsetY + kTileSize * i);
-
-        sprite.Draw(pSRV, x, y, kTileSize, kTileSize, 2);
-    }
-
-    // ギミックはオフセットを考慮した配置になっているので，
-    // スクロールさせるためにオフセット分を差し引く必要あり.
-    for(auto& itr : Gimmicks)
-    {
-        auto box  = itr->GetBox();
-        auto pSRV = itr->GetSRV();
-        auto x = int(offsetX + box.Pos.x) - kTileOffsetX;
-        auto y = int(offsetY + box.Pos.y) - kTileOffsetY;
-
-        sprite.Draw(pSRV, x, y, box.Size.x, box.Size.y, 2);
-    }
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
-// GameMap class
+// MapSystem class
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
 //      コンストラクタです.
 //-----------------------------------------------------------------------------
-GameMap::GameMap()
+MapSystem::MapSystem()
 {
     MessageMgr::Instance().Add(this);
 }
@@ -120,22 +87,29 @@ GameMap::GameMap()
 //-----------------------------------------------------------------------------
 //      デストラクタです.
 //-----------------------------------------------------------------------------
-GameMap::~GameMap()
+MapSystem::~MapSystem()
 {
     m_Data = nullptr;
+    m_Next = nullptr;
     MessageMgr::Instance().Remove(this);
 }
 
 //-----------------------------------------------------------------------------
-//      タイルを設定します.
+//      現在のマップデータを設定します.
 //-----------------------------------------------------------------------------
-void GameMap::SetData(GameMapData* value)
-{ m_Data = value; }
+void MapSystem::SetData(MapInstance* instance)
+{ m_Data = instance; }
+
+//-----------------------------------------------------------------------------
+//      次のマップデータを設定します.
+//-----------------------------------------------------------------------------
+void MapSystem::SetNext(MapInstance* instance)
+{ m_Next = instance; }
 
 //-----------------------------------------------------------------------------
 //      タイルを取得します.
 //-----------------------------------------------------------------------------
-Tile GameMap::GetTile(uint8_t id) const
+Tile MapSystem::GetTile(uint8_t id) const
 {
     assert(id < kTileTotalCount);
     return m_Data->Tile[id];
@@ -144,7 +118,7 @@ Tile GameMap::GetTile(uint8_t id) const
 //-----------------------------------------------------------------------------
 //      描画処理を行います.
 //-----------------------------------------------------------------------------
-void GameMap::Draw(SpriteSystem& sprite, int playerY)
+void MapSystem::Draw(SpriteSystem& sprite, int playerY)
 {
     auto idx = 0;
     for(auto i=0u; i<kTileCountY; ++i)
@@ -153,7 +127,7 @@ void GameMap::Draw(SpriteSystem& sprite, int playerY)
         auto tile = m_Data->Tile[idx];
         idx++;
 
-        auto pSRV = GetGameMap(tile.TextureId);
+        auto pSRV = GetTexture(tile.TextureId);
         auto step = (float)(j) / kTileCountX;
 
         auto x = int(kTileOffsetX + kTileSize * j) + int(m_Scroll.x);
@@ -174,12 +148,45 @@ void GameMap::Draw(SpriteSystem& sprite, int playerY)
 
         itr->Draw(sprite, z);
     }
+
+    // 次のマップを表示.
+    if (m_IsScroll)
+    {
+        auto dir = GetMoveDir(DIRECTION_STATE(m_ScrollDir));
+        auto pos = Vector2i(kTileTotalW, kTileTotalH) * dir;
+        pos.x += int(m_Scroll.x);
+        pos.y += int(m_Scroll.y);
+
+        idx = 0;
+        for(auto i=0u; i<kTileCountY; ++i)
+        for(auto j=0u; j<kTileCountX; ++j)
+        {
+            auto tile = m_Next->Tile[idx];
+            idx++;
+
+            auto pSRV = GetTexture(tile.TextureId);
+            auto x = int(pos.x + kTileSize * j) + kTileOffsetX;
+            auto y = int(pos.y + kTileSize * i) + kTileOffsetY;
+
+            sprite.Draw(pSRV, x, y, kTileSize, kTileSize, 2);
+        }
+
+        for(auto& itr : m_Next->Gimmicks)
+        {
+            auto box  = itr->GetBox();
+            auto pSRV = itr->GetSRV();
+            auto x = int(pos.x + box.Pos.x);
+            auto y = int(pos.y + box.Pos.y);
+
+            sprite.Draw(pSRV, x, y, box.Size.x, box.Size.y, 2);
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------
 //      移動可能かどうかチェックします.
 //-----------------------------------------------------------------------------
-bool GameMap::CanMove(const Box& nextBox)
+bool MapSystem::CanMove(const Box& nextBox)
 {
     // 半キャラ分の可動を許した方が可動領域が広くて操作しやすかったので，
     // 半キャラ分許容する.
@@ -190,15 +197,13 @@ bool GameMap::CanMove(const Box& nextBox)
 
     if (m_Data->Tile[id].Switchable)
     {
-        // 最初の一回だけフラグを立てたいから.
-        if (!(m_Flags & GAMEMAP_FLAG_SWITCH))
-        { m_Flags |= GAMEMAP_FLAG_SWITCH; }
+        if (!m_IsSwitch)
+        { m_IsSwitch = true; }
     }
     else if (m_Data->Tile[id].Scrollable)
     {
-        // 最初の一回だけフラグを立てたいから.
-        if (!(m_Flags & GAMEMAP_FLAG_SCROLL))
-        { m_Flags |= GAMEMAP_FLAG_SCROLL; }
+        if (!m_IsScroll)
+        { m_IsScroll = true; }
     }
 
     // 移動しちゃダメなタイルなら処理終了.
@@ -219,14 +224,14 @@ bool GameMap::CanMove(const Box& nextBox)
 //-----------------------------------------------------------------------------
 //      更新処理を行います.
 //-----------------------------------------------------------------------------
-void GameMap::Update(UpdateContext& context)
+void MapSystem::Update(UpdateContext& context)
 {
-    if (!!(m_Flags & GAMEMAP_FLAG_SWITCH))
+    if (m_IsSwitch)
     {
         Message msg(MESSAGE_ID_MAP_SWITCH);
         SendMsg(msg);
     }
-    else if (!!(m_Flags & GAMEMAP_FLAG_SCROLL))
+    else if (m_IsScroll)
     {
         Message msg(MESSAGE_ID_MAP_SCROLL, &context.PlayerDir, sizeof(context.PlayerDir));
         SendMsg(msg);
@@ -235,7 +240,7 @@ void GameMap::Update(UpdateContext& context)
     for(auto& itr : m_Data->Gimmicks)
     { itr->Update(context); }
 
-    if (!!(m_Flags & GAMEMAP_FLAG_SCROLL))
+    if (m_IsScroll)
     { Scroll(DIRECTION_STATE(context.PlayerDir)); }
 }
 
@@ -243,23 +248,31 @@ void GameMap::Update(UpdateContext& context)
 //-----------------------------------------------------------------------------
 //      ギミックをリセットします.
 //-----------------------------------------------------------------------------
-void GameMap::ResetGimmicks()
+void MapSystem::Reset()
 {
     for(auto& itr : m_Data->Gimmicks)
     { itr->Reset(); }
 }
 
 //-----------------------------------------------------------------------------
-//      フラグを取得します.
+//      場面切り替え中かどうか?
 //-----------------------------------------------------------------------------
-uint8_t GameMap::GetFlags() const
-{ return m_Flags; }
+bool MapSystem::IsSwitch() const
+{ return m_IsSwitch; }
+
+//-----------------------------------------------------------------------------
+//      スクロール切り替え中かどうか?
+//-----------------------------------------------------------------------------
+bool MapSystem::IsScroll() const
+{ return m_IsScroll; }
 
 //-----------------------------------------------------------------------------
 //      スクロールによるマップ切り替えを行います.
 //-----------------------------------------------------------------------------
-void GameMap::Scroll(DIRECTION_STATE dir)
+void MapSystem::Scroll(DIRECTION_STATE dir)
 {
+    m_ScrollDir = dir;
+
     if (m_ScrollFrame < kScrollFrame)
     {
         m_ScrollFrame++;
@@ -272,11 +285,16 @@ void GameMap::Scroll(DIRECTION_STATE dir)
         m_Scroll.y    = 0;
 
         // フラグをおろす.
-        m_Flags &= ~(GAMEMAP_FLAG_SCROLL);
+        m_IsScroll = false;
 
         // 完了メッセージを送信.
         Message msg(MESSAGE_ID_MAP_CHANGED);
         SendMsg(msg);
+
+        // マップを更新.
+        auto data = m_Data;
+        m_Data = m_Next;
+        m_Next = m_Data;
 
         // おしまい.
         return;
@@ -305,16 +323,16 @@ void GameMap::Scroll(DIRECTION_STATE dir)
 //-----------------------------------------------------------------------------
 //      メッセージ受信処理を行います.
 //-----------------------------------------------------------------------------
-void GameMap::OnMessage(const Message& msg)
+void MapSystem::OnMessage(const Message& msg)
 {
     switch(msg.GetType())
     {
     case MESSAGE_ID_MAP_SCROLL:
-        { m_Flags |= GAMEMAP_FLAG_SCROLL; }
+        { m_IsScroll = true; }
         break;
 
     case MESSAGE_ID_MAP_SWITCH:
-        { m_Flags |= GAMEMAP_FLAG_SWITCH; }
+        { m_IsSwitch = true; }
         break;
 
     default:
@@ -322,60 +340,4 @@ void GameMap::OnMessage(const Message& msg)
     }
 }
 
-//-----------------------------------------------------------------------------
-//      スクロール値を取得します.
-//-----------------------------------------------------------------------------
-Vector2i GameMap::GetScroll() const
-{ return Vector2i(int(m_Scroll.x), int(m_Scroll.y)); }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// GameMapTextureMgr class
-///////////////////////////////////////////////////////////////////////////////
-GameMapTextureMgr GameMapTextureMgr::s_Instance;
-
-//-----------------------------------------------------------------------------
-//      シングルインスタンスを取得します.
-//-----------------------------------------------------------------------------
-GameMapTextureMgr& GameMapTextureMgr::Instance()
-{ return s_Instance; }
-
-//-----------------------------------------------------------------------------
-//      初期化処理を行います.
-//-----------------------------------------------------------------------------
-bool GameMapTextureMgr::Init()
-{
-    auto count = _countof(kGameMapTextures);
-    m_Textures.resize(count);
-
-    for(auto i=0u; i<count; ++i)
-    {
-        if (!LoadTexture2D(
-            kGameMapTextures[i].Path,
-            m_Textures[kGameMapTextures[i].Type]))
-        {
-            ELOGA("Error : LoadTexture2D() Failed. path = %s", kGameMapTextures[i].Path);
-            return false;
-        }
-    }
-
-    return true;
-}
-
-//-----------------------------------------------------------------------------
-//      終了処理を行います.
-//-----------------------------------------------------------------------------
-void GameMapTextureMgr::Term()
-{
-    for(size_t i=0; i<m_Textures.size(); ++i)
-    { m_Textures[i].Release(); }
-}
-
-//-----------------------------------------------------------------------------
-//      シェーダリソースビューを取得.
-//-----------------------------------------------------------------------------
-ID3D11ShaderResourceView* GameMapTextureMgr::GetSRV(uint32_t index) const
-{
-    assert(index < m_Textures.size());
-    return m_Textures[index].GetSRV();
-}

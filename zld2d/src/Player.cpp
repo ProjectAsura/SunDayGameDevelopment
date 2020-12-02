@@ -12,7 +12,9 @@
 #include <asdxRenderState.h>
 #include <asdxLogger.h>
 #include <asdxHid.h>
-#include <GameMap.h>
+#include <asdxMisc.h>
+#include <asdxDeviceContext.h>
+#include <MapSystem.h>
 #include <Vector2i.h>
 #include <MessageId.h>
 #include <MessageMgr.h>
@@ -76,6 +78,35 @@ int GetPlayerId(int state, int dir, int frame)
     return result;
 }
 
+//-----------------------------------------------------------------------------
+//      テクスチャをロードします.
+//-----------------------------------------------------------------------------
+bool LoadTexture(const char* path, asdx::Texture2D& result)
+{
+    std::string texturePath;
+    if (!asdx::SearchFilePathA(path, texturePath))
+    {
+        ELOGA("Error : File Not Found. path = %s", path);
+        return false;
+    }
+
+    asdx::ResTexture res;
+    if (!res.LoadFromFileA(texturePath.c_str()))
+    {
+        ELOGA("Error : ResTexsture::LoadFromFileA() Failed. path = %s", texturePath.c_str());
+        return false;
+    }
+
+    auto pDevice  = asdx::DeviceContext::Instance().GetDevice();
+    auto pContext = asdx::DeviceContext::Instance().GetContext();
+    if (!result.Create(pDevice, pContext, res))
+    {
+        ELOGA("Error : Texture2D::Create() Failed. path = %s", texturePath.c_str());
+        return false;
+    }
+
+    return true;
+}
 
 } // namespace
 
@@ -104,13 +135,13 @@ bool Player::Init()
 {
     for(auto i=0; i<12; ++i)
     {
-        if (!LoadTexture2D(kPlayerTextures[i], m_PlayerTexture[i]))
+        if (!LoadTexture(kPlayerTextures[i], m_PlayerTexture[i]))
         { return false; }
     }
 
     for(auto i=0; i<4; ++i)
     {
-        if (!LoadTexture2D(kSpearTextures[i], m_WeaponTexture[i]))
+        if (!LoadTexture(kSpearTextures[i], m_WeaponTexture[i]))
         { return false; }
     }
 
@@ -154,7 +185,7 @@ void Player::Update(UpdateContext& context)
     int y = 0;
 
     // スロール中ではない場合.
-    if ((context.Map->GetFlags() & GAMEMAP_FLAG_SCROLL) == 0)
+    if (!context.Map->IsScroll())
     {
         if (m_Action == PLAYER_ACTION_NONE)
         {
@@ -235,7 +266,7 @@ void Player::Update(UpdateContext& context)
 
     if (context.Pad->IsDown(asdx::PAD_Y))
     {
-        context.Map->ResetGimmicks();
+        context.Map->Reset();
     }
 #endif
 

@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 #include <cassert>
 #include <gimmick/Block.h>
-#include <GameMap.h>
+#include <MapSystem.h>
 #include <asdxLogger.h>
 #include <MessageId.h>
 

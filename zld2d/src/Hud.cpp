@@ -8,8 +8,9 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include <Hud.h>
-#include <TextureHelper.h>
 #include <asdxLogger.h>
+#include <TextureId.h>
+#include <TextureMgr.h>
 
 
 namespace {
@@ -21,12 +22,6 @@ static const int kLifeOffsetX = 32;
 static const int kLifeOffsetY = 8;
 static const int kLifeSize    = 32;
 
-static const char* kTextures[] = {
-    "../res/texture/hud/star_full.tga",
-    "../res/texture/hud/star_lack.tga",
-    "../res/texture/hud/white.tga",
-    "../res/texture/hud/wnd.tga",
-};
 
 
 } // namespace
@@ -46,33 +41,7 @@ Hud::Hud()
 //      デストラクタです.
 //-----------------------------------------------------------------------------
 Hud::~Hud()
-{ Term(); }
-
-//-----------------------------------------------------------------------------
-//      初期化処理を行います.
-//-----------------------------------------------------------------------------
-bool Hud::Init()
-{
-    for(auto i=0; i<_countof(kTextures); ++i)
-    {
-        if (!LoadTexture2D(kTextures[i], m_Texture[i]))
-        {
-            ELOGA("Error : Texture Load Failed. index = %d", i);
-            return false;
-        }
-    }
-
-    return true;
-}
-
-//-----------------------------------------------------------------------------
-//      終了処理を行います.
-//-----------------------------------------------------------------------------
-void Hud::Term()
-{
-    for(auto i=0; i<_countof(kTextures); ++i)
-    { m_Texture[i].Release(); }
-}
+{ /* DO_NOTHING */ }
 
 //-----------------------------------------------------------------------------
 //      描画処理を行います.
@@ -88,7 +57,7 @@ void Hud::Draw(SpriteSystem& sprite, const Player& player)
         {
             sprite.SetColor(1.0f, 1.0f, 1.0f, 1.0f);
             sprite.Draw(
-                m_Texture[HUD_TEXTURE_LIFE_FULL].GetSRV(),
+                GetTexture(TEXTURE_HUD_LIFE_FULL),
                 kLifeOffsetX + kLifeSize * (i - 1),
                 kLifeOffsetY,
                 kLifeSize,
@@ -98,7 +67,7 @@ void Hud::Draw(SpriteSystem& sprite, const Player& player)
         {
             sprite.SetColor(1.0f, 1.0f, 1.0f, 0.75f);
             sprite.Draw(
-                m_Texture[HUD_TEXTURE_LIFE_LACK].GetSRV(),
+                GetTexture(TEXTURE_HUD_LIFE_LACK),
                 kLifeOffsetX + kLifeSize * (i - 1),
                 kLifeOffsetY,
                 kLifeSize,
@@ -121,6 +90,6 @@ void Hud::DrawWnd(SpriteSystem& sprite, bool upper)
 
     sprite.SetColor(0.75f, 0.75f, 0.75f, 0.75f);
     sprite.Draw(
-        m_Texture[HUD_TEXTURE_WINDOW].GetSRV(),
+        GetTexture(TEXTURE_HUD_WINDOW),
         kX, kY, kW, kH, 0);
 }

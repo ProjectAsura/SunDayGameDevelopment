@@ -97,7 +97,7 @@
     <ClInclude Include="..\include\DirectionState.h" />
     <ClInclude Include="..\include\Enemy.h" />
     <ClInclude Include="..\include\GameApp.h" />
-    <ClInclude Include="..\include\GameMap.h" />
+    <ClInclude Include="..\include\MapSystem.h" />
     <ClInclude Include="..\include\MessageId.h" />
     <ClInclude Include="..\include\Gimmick.h" />
     <ClInclude Include="..\include\gimmick\Block.h" />
@@ -105,6 +105,8 @@
     <ClInclude Include="..\include\MessageMgr.h" />
     <ClInclude Include="..\include\Player.h" />
     <ClInclude Include="..\include\SpriteSystem.h" />
+    <ClInclude Include="..\include\TextureId.h" />
+    <ClInclude Include="..\include\TextureMgr.h" />
     <ClInclude Include="..\include\TextWriter.h" />
     <ClInclude Include="..\include\TextureHelper.h" />
     <ClInclude Include="..\include\UpdateContext.h" />
@@ -113,7 +115,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\Enemy.cpp" />
     <ClCompile Include="..\src\GameApp.cpp" />
-    <ClCompile Include="..\src\GameMap.cpp" />
+    <ClCompile Include="..\src\MapSystem.cpp" />
     <ClCompile Include="..\src\Gimmick.cpp" />
     <ClCompile Include="..\src\gimmick\Block.cpp" />
     <ClCompile Include="..\src\Hud.cpp" />
@@ -121,7 +123,7 @@
     <ClCompile Include="..\src\MessageMgr.cpp" />
     <ClCompile Include="..\src\Player.cpp" />
     <ClCompile Include="..\src\SpriteSystem.cpp" />
-    <ClCompile Include="..\src\TextureHelper.cpp" />
+    <ClCompile Include="..\src\TextureMgr.cpp" />
     <ClCompile Include="..\src\TextWriter.cpp" />
   </ItemGroup>
   <ItemGroup>

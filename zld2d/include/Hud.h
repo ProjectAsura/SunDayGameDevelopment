@@ -34,29 +34,14 @@ public:
     //=========================================================================
     Hud();
     ~Hud();
-    bool Init();
-    void Term();
     void Draw(SpriteSystem& sprite, const Player& player);
     void DrawWnd(SpriteSystem& sprite, bool upper = false);
 
 private:
-    ///////////////////////////////////////////////////////////////////////////////
-    // HUD_TEXTURE enum
-    ///////////////////////////////////////////////////////////////////////////////
-    enum HUD_TEXTURE
-    {
-        HUD_TEXTURE_LIFE_FULL,  // 満☆
-        HUD_TEXTURE_LIFE_LACK,  // 欠☆
-        HUD_TEXTURE_WHITE,      // 無地.
-        HUD_TEXTURE_WINDOW,     // メッセージウィンドウ.
-
-        HUD_TEXTURE_COUNT
-    };
-
     //=========================================================================
     // private variables.
     //=========================================================================
-    asdx::Texture2D m_Texture[HUD_TEXTURE_COUNT];
+    /* NOTHING */
 
     //=========================================================================
     // private methods.

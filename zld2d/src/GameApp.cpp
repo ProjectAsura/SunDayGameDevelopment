@@ -10,9 +10,32 @@
 #include <GameApp.h>
 #include <asdxLogger.h>
 #include <asdxRenderState.h>
-#include <TextureHelper.h>
 #include <gimmick/Block.h>
+#include <TextureId.h>
+#include <TextureMgr.h>
 
+
+namespace {
+
+// TEXTURE_IDと同じ順番で定義すること!!
+static const char* kTexturePath[] = {
+    // 単色系.
+    "../res/texture/map/plane.tga",
+
+    // Map系.
+    "../res/texture/map/rock.tga",
+    "../res/texture/map/tree.tga",
+    "../res/texture/map/block.tga",
+
+    // HUD系.
+    "../res/texture/hud/star_full.tga",
+    "../res/texture/hud/star_lack.tga",
+    "../res/texture/hud/wnd.tga",
+};
+
+
+
+} // namespace
 
 ///////////////////////////////////////////////////////////////////////////////
 // GameApp class
@@ -51,7 +74,7 @@ bool GameApp::OnInit()
     }
 
     // ゲームマップテクスチャ初期化.
-    if (!GameMapTextureMgr::Instance().Init())
+    if (!TextureMgr::Instance().Load(_countof(kTexturePath), kTexturePath))
     {
         ELOGA("Error : GameMapTextureMgr::Init() Failed.");
         return false;
@@ -64,13 +87,6 @@ bool GameApp::OnInit()
         return false;
     }
 
-    // HUD初期化.
-    if (!m_Hud.Init())
-    {
-        ELOGA("Error : Hud::Init() Failed.");
-        return false;
-    }
-
     //if (!m_EnemyTest.Init())
     //{
     //    return false;
@@ -79,7 +95,7 @@ bool GameApp::OnInit()
     //m_Block.Init( 300, 400, 64, 64, DIRECTION_RIGHT, GetGameMap(GAMEMAP_TEXTURE_ROCK));
 
     auto block = new Block();
-    block->SetTilePos(4, 5).SetSize(64, 64).SetSRV(GetGameMap(GAMEMAP_TEXTURE_BLOCK));
+    block->SetTilePos(4, 5).SetSize(64, 64).SetSRV(GetTexture(TEXTURE_MAP_BLOCK));
     //block->SetDir(DIRECTION_RIGHT);
     m_MapData.Gimmicks.push_back(block);
 
@@ -95,7 +111,7 @@ bool GameApp::OnInit()
                 tile.Moveable = true;
                 tile.Switchable = false;
                 tile.Scrollable = true;
-                tile.TextureId = GAMEMAP_TEXTURE_PLANE;
+                tile.TextureId = TEXTURE_WHITE;
                 m_MapData.Tile[id] = tile;
             }
             else if (i == 0 || j == 0 || j == (kTileCountX - 1) || i == (kTileCountY - 1)
@@ -105,7 +121,7 @@ bool GameApp::OnInit()
                 tile.Moveable = false;
                 tile.Switchable = false;
                 tile.Scrollable = false;
-                tile.TextureId = GAMEMAP_TEXTURE_TREE;
+                tile.TextureId = TEXTURE_MAP_TREE;
                 m_MapData.Tile[id] = tile;
             }
             else
@@ -114,7 +130,7 @@ bool GameApp::OnInit()
                 tile.Moveable = true;
                 tile.Scrollable = false;
                 tile.Switchable = false;
-                tile.TextureId = GAMEMAP_TEXTURE_PLANE;
+                tile.TextureId = TEXTURE_WHITE;
                 m_MapData.Tile[id] = tile;
             }
 
@@ -122,7 +138,8 @@ bool GameApp::OnInit()
         }
     }
 
-    m_Map.SetData(&m_MapData);
+    m_MapSystem.SetData(&m_MapData);
+    m_MapSystem.SetNext(&m_MapData);
 
     if (!m_TextWriter.Init(m_pFactoryDW.GetPtr(), m_pDeviceContext2D.GetPtr(), L"しねきゃぷしょん", 32))
     {
@@ -140,14 +157,10 @@ void GameApp::OnTerm()
 {
     m_Sprite.Term();
     m_Player.Term();
-    m_Hud   .Term();
 
     //m_EnemyTest.Term();
 
     m_TextWriter.Term();
-
-    GameMapTextureMgr::Instance().Term();
-
 }
 
 //-----------------------------------------------------------------------------
@@ -161,13 +174,13 @@ void GameApp::OnFrameMove(asdx::FrameEventArgs& args)
     UpdateContext context = {};
     context.ElapsedSec  = float(args.ElapsedTime);
     context.Pad         = &m_Pad;
-    context.Map         = &m_Map;
+    context.Map         = &m_MapSystem;
 
     // プレイヤー更新.
     m_Player.Update(context);
 
     // マップ更新.
-    m_Map.Update(context);
+    m_MapSystem.Update(context);
 
     //// 敵更新.
     //m_EnemyTest.Update(context);
@@ -224,16 +237,8 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
         m_Sprite.Begin(m_pDeviceContext);
         m_Sprite.SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-        // 次のマップをスクロールしながら表示.
-        if (!!(m_Map.GetFlags() & GAMEMAP_FLAG_SCROLL))
-        {
-            auto dir = GetMoveDir(m_Player.GetDir());
-            auto pos = Vector2i(kTileTotalW, kTileTotalH) * dir + m_Map.GetScroll();
-            m_MapData.Draw(m_Sprite, pos.x + kTileOffsetX, pos.y + kTileOffsetY);
-        }
-
         // マップ描画.
-        m_Map.Draw(m_Sprite, m_Player.GetBox().Pos.y);
+        m_MapSystem.Draw(m_Sprite, m_Player.GetBox().Pos.y);
 
 
         //// 敵描画.

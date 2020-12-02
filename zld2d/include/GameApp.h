@@ -14,7 +14,7 @@
 #include <asdxTarget.h>
 #include <Player.h>
 #include <SpriteSystem.h>
-#include <GameMap.h>
+#include <MapSystem.h>
 #include <Hud.h>
 //#include <enemy/EnemyTest.h>
 #include <TextWriter.h>
@@ -50,11 +50,10 @@ private:
     asdx::GamePad       m_Pad;
     Player              m_Player;
     SpriteSystem        m_Sprite;
-    GameMap             m_Map;
+    MapSystem           m_MapSystem;
     //EnemyTest           m_EnemyTest;
     Hud                 m_Hud;
-    GameMapData         m_MapData;
-
+    MapInstance         m_MapData;
     TextWriter          m_TextWriter;
 
     //=========================================================================
