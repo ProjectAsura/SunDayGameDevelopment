@@ -17,7 +17,7 @@
 #include <MapSystem.h>
 #include <Hud.h>
 //#include <enemy/EnemyTest.h>
-#include <TextWriter.h>
+#include <EventSystem.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,6 +51,7 @@ private:
     Player              m_Player;
     SpriteSystem        m_Sprite;
     MapSystem           m_MapSystem;
+    EventSystem         m_EventSystem;
     //EnemyTest           m_EnemyTest;
     Hud                 m_Hud;
     MapInstance         m_MapData;

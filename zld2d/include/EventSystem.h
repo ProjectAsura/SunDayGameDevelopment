@@ -53,6 +53,16 @@ public:
     ~EventSystem();
 
     //-------------------------------------------------------------------------
+    //! @brief      初期化処理を行います.
+    //-------------------------------------------------------------------------
+    bool Init(IDWriteFactory* pFactory, ID2D1DeviceContext* pContext);
+
+    //-------------------------------------------------------------------------
+    //! @brief      終了処理を行います.
+    //-------------------------------------------------------------------------
+    void Term();
+
+    //-------------------------------------------------------------------------
     //! @brief      メッセージウィンドウ枠を表示します.
     //-------------------------------------------------------------------------
     void DrawWindow(SpriteSystem& sprite, bool upper = false);
@@ -67,16 +77,28 @@ public:
     //-------------------------------------------------------------------------
     void OnMessage(const Message& msg) override;
 
+    //-------------------------------------------------------------------------
+    //! @brief      シナリオIDを取得します.
+    //-------------------------------------------------------------------------
+    uint32_t GetScenarioId() const;
+
+    //-------------------------------------------------------------------------
+    //! @brief      イベントIDを取得します.
+    //-------------------------------------------------------------------------
+    uint32_t GetEventId() const;
+
 private:
     //=========================================================================
     // private variables.
     //=========================================================================
-    bool        m_IsDraw        = false;
-    wchar_t*    m_Lines[5]      = {};
-    uint32_t    m_ScenarioId    = UINT32_MAX;
-    uint32_t    m_EventId       = UINT32_MAX;
-    uint8_t     m_Type          = 0;
-    uint8_t     m_CurrentChoice = 0; 
+    bool                m_IsDraw        = false;
+    const wchar_t*      m_Lines[5]      = {};
+    uint32_t            m_ScenarioId    = UINT32_MAX;
+    uint32_t            m_EventId       = UINT32_MAX;
+    uint8_t             m_Type          = 0;
+    uint8_t             m_CurrentChoice = 0;
+    ID2D1DeviceContext* m_pContext      = nullptr;
+    TextWriter          m_Writer;
 
     //=========================================================================
     // private methods.
@@ -85,20 +107,16 @@ private:
     ///------------------------------------------------------------------------
     //! @brief      選択枝無しの会話メッセージを表示します.
     //-------------------------------------------------------------------------
-    void DrawEventMsg(const wchar_t* msg);
+    void DrawEventMsg(const wchar_t* msg, bool upper);
 
     //-------------------------------------------------------------------------
     //! @brief      2択の会話メッセージを表示します.
     //-------------------------------------------------------------------------
-    void DrawChoices2(const wchar_t* msg, const wchar_t* choise0, const wchar_t* choise1);
+    void DrawChoices2(const wchar_t* msg, const wchar_t* choise0, const wchar_t* choise1, bool upper);
 
     //-------------------------------------------------------------------------
-    //! @brief      3択の会話メッセージを表示します.
+    //! @brief      イベント内容を問い合わせる.
     //-------------------------------------------------------------------------
-    void DrawChoices3(const wchar_t* msg, const wchar_t* choise0, const wchar_t* choise1, const wchar_t* choise2);
+    void Query();
 
-    //-------------------------------------------------------------------------
-    //! @brief      4択の会話メッセージを表示します.
-    //-------------------------------------------------------------------------
-    void DrawChoices4(const wchar_t* msg, const wchar_t* choise0, const wchar_t* choise1, const wchar_t* choise2, const wchar_t* choise3);
 };

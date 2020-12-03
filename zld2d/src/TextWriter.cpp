@@ -102,6 +102,8 @@ void TextWriter::SetColor(float r, float g, float b, float a)
 void TextWriter::Draw(ID2D1DeviceContext* pContext, const wchar_t* text, float x, float y)
 {
     UINT length = UINT(wcslen(text));
+    if (length == 0)
+    { return; }
 
     D2D_RECT_F rect = {};
     rect.left   = x;
@@ -121,6 +123,9 @@ void TextWriter::DrawLine(ID2D1DeviceContext* pContext, const wchar_t* text, int
 {
     assert(0 <= line && line < 4);
     UINT length = UINT(wcslen(text));
+
+    if (length == 0)
+    { return; }
 
     static const float kW = 958.0f;
     static const float kH = 42.0f; // 32px文字サイズ + 10px上下間隔.

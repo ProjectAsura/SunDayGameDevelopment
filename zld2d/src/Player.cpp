@@ -384,6 +384,11 @@ void Player::OnMessage(const Message& msg)
         { OnScrollComplted(); }
         break;
 
+    case MESSAGE_ID_EVENT_USER_DECIDE:
+        {
+        }
+        break;
+
     default:
         break;
     }

@@ -22,4 +22,5 @@ enum TEXTURE_ID : unsigned int
     TEXTURE_HUD_LIFE_FULL,  // HUD-満☆.
     TEXTURE_HUD_LIFE_LACK,  // HUD-欠☆.
     TEXTURE_HUD_WINDOW,     // HUD-メッセージウィンドウ.
+    TEXTURE_HUD_SELECT_CURSOR,
 };

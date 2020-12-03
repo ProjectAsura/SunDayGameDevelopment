@@ -31,6 +31,7 @@ static const char* kTexturePath[] = {
     "../res/texture/hud/star_full.tga",
     "../res/texture/hud/star_lack.tga",
     "../res/texture/hud/wnd.tga",
+    "../res/texture/hud/select_cursor.tga",
 };
 
 
@@ -77,6 +78,13 @@ bool GameApp::OnInit()
     if (!TextureMgr::Instance().Load(_countof(kTexturePath), kTexturePath))
     {
         ELOGA("Error : GameMapTextureMgr::Init() Failed.");
+        return false;
+    }
+
+    // イベントシステム初期化.
+    if (!m_EventSystem.Init(m_pFactoryDW.GetPtr(), m_pDeviceContext2D.GetPtr()))
+    {
+        ELOGA("Error : EventSystem::Init() Failed.");
         return false;
     }
 
@@ -161,6 +169,7 @@ void GameApp::OnTerm()
     //m_EnemyTest.Term();
 
     m_TextWriter.Term();
+    m_EventSystem.Term();
 }
 
 //-----------------------------------------------------------------------------
@@ -251,8 +260,7 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
         m_Hud.Draw(m_Sprite, m_Player);
 
         // メッセージウィンドウ枠表示.
-        if (showMsg)
-        { m_Hud.DrawWnd(m_Sprite, upper); }
+        m_EventSystem.DrawWindow(m_Sprite, upper);
 
         m_Sprite.End(m_pDeviceContext);
 
@@ -265,8 +273,9 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
         context->BeginDraw();
         context->SetTarget(m_pBitmap2D.GetPtr());
 
-        m_TextWriter.SetColor(0.0f, 0.0f, 0.0f, 1.0f);
-        m_TextWriter.DrawLine(context, L"1行目\n2行目\n3行目\n4行目\n5行目", 0, upper);
+        //m_TextWriter.SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+        //m_TextWriter.DrawLine(context, L"1行目\n2行目\n3行目\n4行目\n5行目", 0, upper);
+        m_EventSystem.DrawMsg(context, upper);
 
         m_pDeviceContext2D->EndDraw();
     }
