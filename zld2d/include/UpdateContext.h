@@ -26,4 +26,7 @@ struct UpdateContext
     Box*            BoxYellow;      //!< 黄玉.
     Box*            BoxRed;         //!< 赤玉.
     uint8_t         PlayerDir;      //!< プレイヤーが向いている方向.
+    uint32_t        ScenarioId;     //!< シナリオID.
+    uint32_t        EventId;        //!< イベントID.
+    bool            IsEvent;        //!< イベント中かどうか?
 };

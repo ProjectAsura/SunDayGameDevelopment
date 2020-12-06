@@ -11,12 +11,14 @@
 #include <cstdint>
 #include <cassert>
 #include <list>
+#include <asdxFrameHeap.h>
+#include <asdxQueue.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Message class
 ///////////////////////////////////////////////////////////////////////////////
-class Message
+class Message : public asdx::Queue<Message>::Node
 {
     //=========================================================================
     // list of friend classes and methods.
@@ -73,8 +75,8 @@ private:
     // private variables.
     //=========================================================================
     uint32_t    m_Type      = 0;
-    const void* m_pBuffer   = nullptr;
     uint64_t    m_Size      = 0;
+    const void* m_pBuffer   = nullptr;
 
     //=========================================================================
     // private methods.
@@ -128,6 +130,21 @@ public:
     { return s_Instance; }
 
     //-------------------------------------------------------------------------
+    //! @brief      初期化処理を行います.
+    //-------------------------------------------------------------------------
+    bool Init(size_t size)
+    { return m_Heap.Init(size); }
+
+    //-------------------------------------------------------------------------
+    //! @brief      解放処理を行います.
+    //-------------------------------------------------------------------------
+    void Term()
+    {
+        m_Queue.Clear();
+        m_Heap.Term();
+    }
+
+    //-------------------------------------------------------------------------
     //! @brief      メッセージリスナーを追加します.
     //-------------------------------------------------------------------------
     void Add(IMessageListener* instance)
@@ -146,12 +163,42 @@ public:
     { m_Listeners.clear(); }
 
     //-------------------------------------------------------------------------
+    //! @brief      メッセージを追加します.
+    //-------------------------------------------------------------------------
+    void Push(const Message& msg)
+    {
+        auto buf = m_Heap.Alloc(sizeof(Message));
+        assert(buf != nullptr);
+
+        if (msg.GetSize() > 0)
+        {
+            auto data = m_Heap.Alloc(msg.GetSize());
+            memcpy(data, msg.GetBuffer(), msg.GetSize());
+        
+            auto instance = new (buf) Message(msg.GetType(), data, msg.GetSize());
+            m_Queue.Push(instance);
+        }
+        else
+        {
+            auto instance = new (buf) Message(msg.GetType());
+            m_Queue.Push(instance);
+        }
+    }
+
+    //-------------------------------------------------------------------------
     //! @brief      メッセージをブロードキャストします.
     //-------------------------------------------------------------------------
-    void Send(const Message& msg)
+    void Process()
     {
-        for(auto& itr : m_Listeners)
-        { itr->OnMessage(msg); }
+        while(!m_Queue.IsEmpty())
+        {
+            auto msg = m_Queue.Pop();
+
+            for(auto& itr : m_Listeners)
+            { itr->OnMessage(*msg); }
+        }
+
+        m_Heap.Reset();
     }
 
 private:
@@ -160,6 +207,8 @@ private:
     //=========================================================================
     static MessageMgr               s_Instance;
     std::list<IMessageListener*>    m_Listeners;
+    asdx::FrameHeap                 m_Heap;
+    asdx::Queue<Message>            m_Queue;
 
     //=========================================================================
     // private methods.
@@ -186,4 +235,4 @@ private:
 //! @brief      メッセージをブロードキャストします.
 //-----------------------------------------------------------------------------
 inline void SendMsg(const Message& msg)
-{ MessageMgr::Instance().Send(msg); }
+{ MessageMgr::Instance().Push(msg); }

@@ -201,6 +201,10 @@ bool MapSystem::CanMove(const Box& nextBox)
 //-----------------------------------------------------------------------------
 void MapSystem::Update(UpdateContext& context)
 {
+    // 終了に先にフラグを落としたいので，先頭で呼ぶ.
+    if (m_IsScroll)
+    { Scroll(DIRECTION_STATE(context.PlayerDir)); }
+
     if (m_IsSwitch)
     {
         Message msg(MESSAGE_ID_MAP_SWITCH);
@@ -214,9 +218,6 @@ void MapSystem::Update(UpdateContext& context)
 
     for(auto& itr : m_Data->Gimmicks)
     { itr->Update(context); }
-
-    if (m_IsScroll)
-    { Scroll(DIRECTION_STATE(context.PlayerDir)); }
 }
 
 

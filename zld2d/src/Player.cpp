@@ -17,6 +17,7 @@
 #include <Vector2i.h>
 #include <MessageId.h>
 #include <MessageMgr.h>
+#include <EventSystem.h>
 
 
 namespace {
@@ -180,79 +181,139 @@ void Player::Update(UpdateContext& context)
         next = true;
     }
 
-    int x = 0;
-    int y = 0;
-
-    // スロール中ではない場合.
-    if (!context.Map->IsScroll())
+    // イベント中以外.
+    if (!context.IsEvent)
     {
-        if (m_Action == PLAYER_ACTION_NONE)
+        int x = 0;
+        int y = 0;
+
+        // スロール中で
+        if (!context.Map->IsScroll())
         {
-            // 右に進む.
-            if (context.Pad->IsPush(asdx::PAD_RIGHT))
+            if (m_Action == PLAYER_ACTION_NONE)
             {
-                m_Direction = DIRECTION_RIGHT;
-                x = 1;
-            }
-            // 左に進む.
-            else if (context.Pad->IsPush(asdx::PAD_LEFT))
-            {
-                m_Direction = DIRECTION_LEFT;
-                x = -1;
-            }
-            // 上に進む.
-            else if (context.Pad->IsPush(asdx::PAD_UP))
-            {
-                m_Direction = DIRECTION_UP;
-                y = 1;
-            }
-            // 下に進む.
-            else if (context.Pad->IsPush(asdx::PAD_DOWN))
-            {
-                m_Direction = DIRECTION_DOWN;
-                y = -1;
+                // 右に進む.
+                if (context.Pad->IsPush(asdx::PAD_RIGHT))
+                {
+                    m_Direction = DIRECTION_RIGHT;
+                    x = 1;
+                }
+                // 左に進む.
+                else if (context.Pad->IsPush(asdx::PAD_LEFT))
+                {
+                    m_Direction = DIRECTION_LEFT;
+                    x = -1;
+                }
+                // 上に進む.
+                else if (context.Pad->IsPush(asdx::PAD_UP))
+                {
+                    m_Direction = DIRECTION_UP;
+                    y = 1;
+                }
+                // 下に進む.
+                else if (context.Pad->IsPush(asdx::PAD_DOWN))
+                {
+                    m_Direction = DIRECTION_DOWN;
+                    y = -1;
+                }
+
+                if ((x != 0 || y != 0) && next)
+                { m_AnimFrame = (m_AnimFrame + 1) & 0x1; }
             }
 
-            if ((x != 0 || y != 0) && next)
+            if (context.Pad->IsDown(asdx::PAD_A))
+            {
+                auto offset = kOffset[m_Direction];
+
+                // 攻撃判定範囲を更新.
+                m_HitBox.Pos.x  = m_Box.Pos.x + offset.x;
+                m_HitBox.Pos.y  = m_Box.Pos.y + offset.y;
+
+                m_Action        = PLAYER_ACTION_ATTACK;
+                m_AnimLastTime  = 0.0f;
+
+                // 攻撃判定を設定.
+                context.BoxYellow = &m_HitBox;
+            }
+            else if (next)
+            {
+                m_Action = PLAYER_ACTION_NONE;
+            }
+        }
+        else
+        {
+            if (next)
             { m_AnimFrame = (m_AnimFrame + 1) & 0x1; }
         }
 
-        if (context.Pad->IsDown(asdx::PAD_A))
+        context.PlayerDir = m_Direction;
+
+        auto box = m_Box;
+        box.Pos.x += int(x * kAdvancedPixel);
+        box.Pos.y -= int(y * kAdvancedPixel);
+
+        // 隣のタイルに移動できるかどうかチェック.
+        if (context.Map->CanMove(box))
         {
-            auto offset = kOffset[m_Direction];
+            if (m_Action == PLAYER_ACTION_NONE)
+            { m_Box.Pos = box.Pos; }
 
-            // 攻撃判定範囲を更新.
-            m_HitBox.Pos.x  = m_Box.Pos.x + offset.x;
-            m_HitBox.Pos.y  = m_Box.Pos.y + offset.y;
-
-            m_Action        = PLAYER_ACTION_ATTACK;
-            m_AnimLastTime  = 0.0f;
-
-            // 攻撃判定を設定.
-            context.BoxYellow = &m_HitBox;
+            //if (!context.Map->IsScroll())
+            //{
+            //    auto idx = CalcTileIndex(m_Box.Pos.x, m_Box.Pos.y);
+            //    auto id  = CalcTileId(idx);
+            //    auto tile = context.Map->GetTile(id);
+            //    if (tile.Scrollable)
+            //    {
+            //        Message msg(MESSAGE_ID_MAP_SCROLL, &context.PlayerDir, sizeof(context.PlayerDir));
+            //        SendMsg(msg);
+            //    }
+            //    else if (tile.Switchable)
+            //    {
+            //        Message msg(MESSAGE_ID_MAP_SWITCH);
+            //        SendMsg(msg);
+            //    }
+            //}
         }
-        else if (next)
-        {
-            m_Action = PLAYER_ACTION_NONE;
-        }
+
+        if (m_NonDamageFrame == 0)
+        { context.BoxRed  = &m_Box; }
+        else if (m_NonDamageFrame > 0)
+        { m_NonDamageFrame--; }
     }
+    // イベント中.
     else
     {
-        if (next)
-        { m_AnimFrame = (m_AnimFrame + 1) & 0x1; }
-    }
+        // 選択しないといけない場合.
+        if (!!(m_Flags & PLAYER_ACTION_CHOICE))
+        {
+            // 選択肢Aを選ぶ.
+            if (context.Pad->IsPush(asdx::PAD_UP))
+            { m_SelectOption = 0; }
+            // 選択肢Bを選ぶ.
+            else if (context.Pad->IsPush(asdx::PAD_DOWN))
+            { m_SelectOption = 1; }
+            // 決定.
+            else if (context.Pad->IsPush(asdx::PAD_A))
+            {
+                // フラグを下す.
+                m_Flags &= ~(PLAYER_ACTION_CHOICE);
 
-    context.PlayerDir = m_Direction;
+                // ユーザーが設定した選択肢をブロードキャスト.
+                Message msg(MESSAGE_ID_EVENT_USER_REACTION, &m_SelectOption, sizeof(m_SelectOption));
+                SendMsg(msg);
+            }
+        }
+        // メッセージ送り.
+        else if (context.Pad->IsDown(asdx::PAD_A))
+        {
+            // フラグを下す.
+            m_Flags &= ~(PLAYER_ACTION_CHOICE);
 
-    auto box = m_Box;
-    box.Pos.x += int(x * kAdvancedPixel);
-    box.Pos.y -= int(y * kAdvancedPixel);
-
-    // 隣のタイルに移動できるかどうかチェック.
-    if (context.Map->CanMove(box))
-    {
-        if (m_Action == PLAYER_ACTION_NONE)
-        { m_Box.Pos = box.Pos; }
+            // 次のメッセージ要求を送信.
+            Message msg(MESSAGE_ID_EVENT_NEXT);
+            SendMsg(msg);
+        }
     }
 
 #if 1
@@ -267,13 +328,61 @@ void Player::Update(UpdateContext& context)
     {
         context.Map->Reset();
     }
+
+    if (context.Pad->IsDown(asdx::PAD_SHOULDER_R))
+    {
+        if (context.ScenarioId == 0)
+        {
+            switch(context.EventId)
+            {
+            case 0:
+                {
+                    EventData e = {};
+                    e.ScenarioId = 0;
+                    e.EventId = 0;
+                    wcscpy_s(e.Text, L"この先は危険じゃ。\nこの槍を持って行くがよい。");
+
+                    Message msg(MESSAGE_ID_EVENT_RAISE, &e, sizeof(e));
+                    SendMsg(msg);
+                }
+                break;
+
+            case 1:
+                {
+                }
+                break;
+            }
+        }
+    }
+    if (context.Pad->IsDown(asdx::PAD_SHOULDER_L))
+    {
+        if (context.ScenarioId == 0)
+        {
+
+            switch(context.EventId)
+            {
+            case 0:
+                {
+                    EventData e = {};
+                    e.ScenarioId = 0;
+                    e.EventId = 1;
+                    wcscpy_s(e.Text, L"じじいに槍を貰った!\nAボタンを槍を振れるぞ。\n\nこれで敵をやっつけまくろう!!");
+                    Message msg(MESSAGE_ID_EVENT_NEXT, &e, sizeof(e));
+                    SendMsg(msg);
+                }
+                break;
+
+            case 1:
+                {
+                    Message msg(MESSAGE_ID_EVENT_END);
+                    SendMsg(msg);
+                }
+                break;
+            }
+        }
+        
+    }
 #endif
-
-    if (m_NonDamageFrame == 0)
-    { context.BoxRed  = &m_Box; }
-    else if (m_NonDamageFrame > 0)
-    { m_NonDamageFrame--; }
-
 }
 
 
@@ -343,7 +452,6 @@ void Player::OnScroll(const Message& msg)
         { m_Scroll.y -= kCharaScrollY; }
         break;
     }
-
 }
 
 //-----------------------------------------------------------------------------
@@ -384,9 +492,8 @@ void Player::OnMessage(const Message& msg)
         { OnScrollComplted(); }
         break;
 
-    case MESSAGE_ID_EVENT_USER_DECIDE:
-        {
-        }
+    case MESSAGE_ID_EVENT_BRUNCH:
+        { m_Flags |= PLAYER_ACTION_CHOICE; }
         break;
 
     default:
@@ -421,7 +528,6 @@ void Player::OnScrollComplted()
     m_Scroll.x  = 0;
     m_Scroll.y  = 0;
     m_AnimFrame = 0;
-    m_MapFlag   = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -445,3 +551,4 @@ void Player::OnReceiveDamage(const Message& msg)
         SendMsg(msg);
     }
 }
+

@@ -128,7 +128,7 @@ private:
     int                 m_NonDamageFrame = 0;
     uint8_t             m_Flags         = 0;
     asdx::Vector2       m_Scroll        = asdx::Vector2(0.0f, 0.0f);
-    uint8_t             m_MapFlag       = 0;
+    uint8_t             m_SelectOption  = 0;
 
     //=========================================================================
     // private methods.

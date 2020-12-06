@@ -88,6 +88,18 @@ bool GameApp::OnInit()
         return false;
     }
 
+    // メッセージマネージャ初期化.
+    {
+        // 32個までキューイング可能.
+        auto size = (sizeof(Message) + sizeof(EventData)) * 32;
+
+        if (!MessageMgr::Instance().Init(size))
+        {
+            ELOGA("Error : MessageMgr::Init() Failed.");
+            return false;
+        }
+    }
+
     // プレイヤー初期化
     if (!m_Player.Init())
     {
@@ -170,6 +182,7 @@ void GameApp::OnTerm()
 
     m_TextWriter.Term();
     m_EventSystem.Term();
+    MessageMgr::Instance().Term();
 }
 
 //-----------------------------------------------------------------------------
@@ -184,6 +197,9 @@ void GameApp::OnFrameMove(asdx::FrameEventArgs& args)
     context.ElapsedSec  = float(args.ElapsedTime);
     context.Pad         = &m_Pad;
     context.Map         = &m_MapSystem;
+    context.ScenarioId  = m_EventSystem.GetScenarioId();
+    context.EventId     = m_EventSystem.GetEventId();
+    context.IsEvent     = m_EventSystem.IsEvent();
 
     // プレイヤー更新.
     m_Player.Update(context);
@@ -193,6 +209,9 @@ void GameApp::OnFrameMove(asdx::FrameEventArgs& args)
 
     //// 敵更新.
     //m_EnemyTest.Update(context);
+
+    // メッセージ実行.
+    MessageMgr::Instance().Process();
 }
 
 //-----------------------------------------------------------------------------
@@ -273,8 +292,6 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
         context->BeginDraw();
         context->SetTarget(m_pBitmap2D.GetPtr());
 
-        //m_TextWriter.SetColor(0.0f, 0.0f, 0.0f, 1.0f);
-        //m_TextWriter.DrawLine(context, L"1行目\n2行目\n3行目\n4行目\n5行目", 0, upper);
         m_EventSystem.DrawMsg(context, upper);
 
         m_pDeviceContext2D->EndDraw();

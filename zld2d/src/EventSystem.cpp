@@ -89,6 +89,12 @@ uint32_t EventSystem::GetEventId() const
 { return m_EventId; }
 
 //-----------------------------------------------------------------------------
+//      イベント中かどうか?
+//-----------------------------------------------------------------------------
+bool EventSystem::IsEvent() const
+{ return m_IsDraw; }
+
+//-----------------------------------------------------------------------------
 //      メッセージウィンドウ枠を表示します.
 //-----------------------------------------------------------------------------
 void EventSystem::DrawWindow(SpriteSystem& sprite, bool upper)
@@ -105,8 +111,8 @@ void EventSystem::DrawWindow(SpriteSystem& sprite, bool upper)
 
     if (m_Type == MESSAGE_KIND_CHOICES_2)
     {
-        const float kY = (upper) ? 86.0f : 504.0f;
-        static const float kH = 42.0f; // 32px文字サイズ + 10px上下間隔.
+        const int kY = (upper) ? 86 : 504;
+        static const int kH = 42; // 32px文字サイズ + 10px上下間隔.
 
         sprite.SetColor(0.0f, 0.0f, 0.0f, 1.0f);
         sprite.Draw(
@@ -131,11 +137,11 @@ void EventSystem::DrawMsg(ID2D1DeviceContext* context, bool upper)
     switch(m_Type)
     {
     case MESSAGE_KIND_DEFAULT:
-        DrawEventMsg(m_Lines[0], upper);
+        DrawEventMsg(m_Text, upper);
         break;
 
     case MESSAGE_KIND_CHOICES_2:
-        DrawChoices2(m_Lines[0], m_Lines[1], m_Lines[2], upper);
+        DrawChoices2(m_Text, m_Option[0], m_Option[1], upper);
         break;
     }
 }
@@ -165,51 +171,49 @@ void EventSystem::DrawChoices2
 }
 
 //-----------------------------------------------------------------------------
-//      イベント内容を問い合わせる.
-//-----------------------------------------------------------------------------
-void EventSystem::Query()
-{
-}
-
-//-----------------------------------------------------------------------------
 //      メッセージ受信処理です.
 //-----------------------------------------------------------------------------
 void EventSystem::OnMessage(const Message& msg)
 {
     switch(msg.GetType())
     {
-    case MESSAGE_ID_EVENT_START:
+    case MESSAGE_ID_EVENT_RAISE:
         {
             // 描画フラグを立てる.
             m_IsDraw = true;
 
-            auto eventMsg = msg.GetAs<EventMsg>();
+            auto eventMsg = msg.GetAs<EventData>();
             m_ScenarioId  = eventMsg->ScenarioId;
             m_EventId     = eventMsg->EventId;
-
-            Query();
+            wcscpy_s(m_Text, eventMsg->Text);
+            m_Type = MESSAGE_KIND_DEFAULT;
         }
         break;
 
-    case MESSAGE_ID_EVENT_NEXT:
+    case MESSAGE_ID_EVENT_BRUNCH:
         {
-            auto eventMsg = msg.GetAs<EventMsg>();
+            // 描画フラグを立てる.
+            m_IsDraw = true;
+
+            auto eventMsg = msg.GetAs<BrunchData>();
             m_ScenarioId  = eventMsg->ScenarioId;
             m_EventId     = eventMsg->EventId;
-
-            Query();
+            wcscpy_s(m_Text, eventMsg->Text);
+            wcscpy_s(m_Option[0], eventMsg->Option[0]);
+            wcscpy_s(m_Option[1], eventMsg->Option[1]);
+            m_Type = MESSAGE_KIND_CHOICES_2;
         }
         break;
 
     case MESSAGE_ID_EVENT_END:
         {
+            m_Text[0]       = L'\0';
+            m_Option[0][0]  = L'\0';
+            m_Option[1][0]  = L'\0';
+            m_Type           = 0;
+
             // 描画フラグをおろす.
             m_IsDraw = false;
-        }
-        break;
-
-    case MESSAGE_ID_EVENT_USER_DECIDE:
-        {
         }
         break;
     }
