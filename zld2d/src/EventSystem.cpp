@@ -216,5 +216,12 @@ void EventSystem::OnMessage(const Message& msg)
             m_IsDraw = false;
         }
         break;
+
+    case MESSAGE_ID_EVENT_UPDATE_CURSOR:
+        {
+            auto cursor = *msg.GetAs<uint8_t>();
+            m_CurrentChoice = cursor;
+        }
+        break;
     }
 }

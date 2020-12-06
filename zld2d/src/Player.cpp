@@ -25,7 +25,6 @@ namespace {
 //-----------------------------------------------------------------------------
 // Constant Values.
 //-----------------------------------------------------------------------------
-static const float  kOneFrame       = 1.0f / 60.0f;
 static const int    kAnimFrame      = 4;
 static const int    kNonDamageFrame = 180;
 static const int    kAdvancedPixel  = 8;
@@ -170,150 +169,25 @@ void Player::Term()
 //-----------------------------------------------------------------------------
 void Player::Update(UpdateContext& context)
 {
-    m_AnimLastTime += context.ElapsedSec;
+    // フレーム更新.
+    m_Frame++;
 
-    auto next = false;
+    // 移動と攻撃処理.
+    Action(context);
 
-    // 1フレーム分進んだかどうかチェック.
-    if (m_AnimLastTime >= kOneFrame * kAnimFrame)
+    // イベント処理.
+    Event(context);
+
+    if (!context.Map->IsScroll()
+     && !context.Map->IsSwitch() 
+     && !context.IsEvent)
     {
-        m_AnimLastTime = 0.0f;
-        next = true;
-    }
-
-    // イベント中以外.
-    if (!context.IsEvent)
-    {
-        int x = 0;
-        int y = 0;
-
-        // スロール中で
-        if (!context.Map->IsScroll())
-        {
-            if (m_Action == PLAYER_ACTION_NONE)
-            {
-                // 右に進む.
-                if (context.Pad->IsPush(asdx::PAD_RIGHT))
-                {
-                    m_Direction = DIRECTION_RIGHT;
-                    x = 1;
-                }
-                // 左に進む.
-                else if (context.Pad->IsPush(asdx::PAD_LEFT))
-                {
-                    m_Direction = DIRECTION_LEFT;
-                    x = -1;
-                }
-                // 上に進む.
-                else if (context.Pad->IsPush(asdx::PAD_UP))
-                {
-                    m_Direction = DIRECTION_UP;
-                    y = 1;
-                }
-                // 下に進む.
-                else if (context.Pad->IsPush(asdx::PAD_DOWN))
-                {
-                    m_Direction = DIRECTION_DOWN;
-                    y = -1;
-                }
-
-                if ((x != 0 || y != 0) && next)
-                { m_AnimFrame = (m_AnimFrame + 1) & 0x1; }
-            }
-
-            if (context.Pad->IsDown(asdx::PAD_A))
-            {
-                auto offset = kOffset[m_Direction];
-
-                // 攻撃判定範囲を更新.
-                m_HitBox.Pos.x  = m_Box.Pos.x + offset.x;
-                m_HitBox.Pos.y  = m_Box.Pos.y + offset.y;
-
-                m_Action        = PLAYER_ACTION_ATTACK;
-                m_AnimLastTime  = 0.0f;
-
-                // 攻撃判定を設定.
-                context.BoxYellow = &m_HitBox;
-            }
-            else if (next)
-            {
-                m_Action = PLAYER_ACTION_NONE;
-            }
-        }
-        else
-        {
-            if (next)
-            { m_AnimFrame = (m_AnimFrame + 1) & 0x1; }
-        }
-
-        context.PlayerDir = m_Direction;
-
-        auto box = m_Box;
-        box.Pos.x += int(x * kAdvancedPixel);
-        box.Pos.y -= int(y * kAdvancedPixel);
-
-        // 隣のタイルに移動できるかどうかチェック.
-        if (context.Map->CanMove(box))
-        {
-            if (m_Action == PLAYER_ACTION_NONE)
-            { m_Box.Pos = box.Pos; }
-
-            //if (!context.Map->IsScroll())
-            //{
-            //    auto idx = CalcTileIndex(m_Box.Pos.x, m_Box.Pos.y);
-            //    auto id  = CalcTileId(idx);
-            //    auto tile = context.Map->GetTile(id);
-            //    if (tile.Scrollable)
-            //    {
-            //        Message msg(MESSAGE_ID_MAP_SCROLL, &context.PlayerDir, sizeof(context.PlayerDir));
-            //        SendMsg(msg);
-            //    }
-            //    else if (tile.Switchable)
-            //    {
-            //        Message msg(MESSAGE_ID_MAP_SWITCH);
-            //        SendMsg(msg);
-            //    }
-            //}
-        }
-
+        // 通常移動可能な状態であれば当たり判定BOXを設定.
         if (m_NonDamageFrame == 0)
         { context.BoxRed  = &m_Box; }
+        // 無敵時間を更新.
         else if (m_NonDamageFrame > 0)
         { m_NonDamageFrame--; }
-    }
-    // イベント中.
-    else
-    {
-        // 選択しないといけない場合.
-        if (!!(m_Flags & PLAYER_ACTION_CHOICE))
-        {
-            // 選択肢Aを選ぶ.
-            if (context.Pad->IsPush(asdx::PAD_UP))
-            { m_SelectOption = 0; }
-            // 選択肢Bを選ぶ.
-            else if (context.Pad->IsPush(asdx::PAD_DOWN))
-            { m_SelectOption = 1; }
-            // 決定.
-            else if (context.Pad->IsPush(asdx::PAD_A))
-            {
-                // フラグを下す.
-                m_Flags &= ~(PLAYER_ACTION_CHOICE);
-
-                // ユーザーが設定した選択肢をブロードキャスト.
-                Message msg(MESSAGE_ID_EVENT_USER_REACTION, &m_SelectOption, sizeof(m_SelectOption));
-                SendMsg(msg);
-            }
-        }
-        // メッセージ送り.
-        else if (context.Pad->IsDown(asdx::PAD_A))
-        {
-            // フラグを下す.
-            m_Flags &= ~(PLAYER_ACTION_CHOICE);
-
-            // 次のメッセージ要求を送信.
-            Message msg(MESSAGE_ID_EVENT_NEXT);
-            SendMsg(msg);
-        }
     }
 
 #if 1
@@ -337,12 +211,20 @@ void Player::Update(UpdateContext& context)
             {
             case 0:
                 {
-                    EventData e = {};
-                    e.ScenarioId = 0;
-                    e.EventId = 0;
-                    wcscpy_s(e.Text, L"この先は危険じゃ。\nこの槍を持って行くがよい。");
+                    //EventData e = {};
+                    //e.ScenarioId = 0;
+                    //e.EventId = 0;
+                    //wcscpy_s(e.Text, L"この先は危険じゃ。\nこの槍を持って行くがよい。");
 
-                    Message msg(MESSAGE_ID_EVENT_RAISE, &e, sizeof(e));
+                    //Message msg(MESSAGE_ID_EVENT_RAISE, &e, sizeof(e));
+                    //SendMsg(msg);
+                    BrunchData b = {};
+                    b.ScenarioId = 0;
+                    b.EventId = 0;
+                    wcscpy_s(b.Text, L"お風呂にする?それともご飯にする?");
+                    wcscpy_s(b.Option[0], L"お風呂だ！");
+                    wcscpy_s(b.Option[1], L"もちろんごはん");
+                    Message msg(MESSAGE_ID_EVENT_BRUNCH, &b, sizeof(b));
                     SendMsg(msg);
                 }
                 break;
@@ -363,11 +245,13 @@ void Player::Update(UpdateContext& context)
             {
             case 0:
                 {
-                    EventData e = {};
-                    e.ScenarioId = 0;
-                    e.EventId = 1;
-                    wcscpy_s(e.Text, L"じじいに槍を貰った!\nAボタンを槍を振れるぞ。\n\nこれで敵をやっつけまくろう!!");
-                    Message msg(MESSAGE_ID_EVENT_NEXT, &e, sizeof(e));
+                    //EventData e = {};
+                    //e.ScenarioId = 0;
+                    //e.EventId = 1;
+                    //wcscpy_s(e.Text, L"じじいに槍を貰った!\nAボタンを槍を振れるぞ。\n\nこれで敵をやっつけまくろう!!");
+                    //Message msg(MESSAGE_ID_EVENT_RAISE, &e, sizeof(e));
+                    //SendMsg(msg);
+                    Message msg(MESSAGE_ID_EVENT_END);
                     SendMsg(msg);
                 }
                 break;
@@ -385,6 +269,149 @@ void Player::Update(UpdateContext& context)
 #endif
 }
 
+//-----------------------------------------------------------------------------
+//      移動処理と攻撃処理.
+//-----------------------------------------------------------------------------
+void Player::Action(UpdateContext& context)
+{
+    // イベント中以外.
+    if (context.IsEvent)
+    { return; }
+
+    int x = 0;
+    int y = 0;
+
+    auto next = (m_Frame % kAnimFrame) == 0;
+
+    // スロール中でないとき.
+    if (!context.Map->IsScroll())
+    {
+        if (m_Action == PLAYER_ACTION_NONE)
+        {
+            // 右に進む.
+            if (context.Pad->IsPush(asdx::PAD_RIGHT))
+            {
+                m_Direction = DIRECTION_RIGHT;
+                x = 1;
+            }
+            // 左に進む.
+            else if (context.Pad->IsPush(asdx::PAD_LEFT))
+            {
+                m_Direction = DIRECTION_LEFT;
+                x = -1;
+            }
+            // 上に進む.
+            else if (context.Pad->IsPush(asdx::PAD_UP))
+            {
+                m_Direction = DIRECTION_UP;
+                y = 1;
+            }
+            // 下に進む.
+            else if (context.Pad->IsPush(asdx::PAD_DOWN))
+            {
+                m_Direction = DIRECTION_DOWN;
+                y = -1;
+            }
+
+            if ((x != 0 || y != 0) && next)
+            { m_AnimFrame = (m_AnimFrame + 1) & 0x1; }
+        }
+
+        if (context.Pad->IsDown(asdx::PAD_A))
+        {
+            auto offset = kOffset[m_Direction];
+
+            // 攻撃判定範囲を更新.
+            m_HitBox.Pos.x  = m_Box.Pos.x + offset.x;
+            m_HitBox.Pos.y  = m_Box.Pos.y + offset.y;
+
+            m_Action = PLAYER_ACTION_ATTACK;
+
+            // 攻撃判定を設定.
+            context.BoxYellow = &m_HitBox;
+
+            m_Frame = 0;
+        }
+        else
+        {
+            if (next)
+            { m_Action = PLAYER_ACTION_NONE; }
+        }
+    }
+    else
+    {
+        // スクロール中はアニメーション更新する.
+        if (next)
+        { m_AnimFrame = (m_AnimFrame + 1) & 0x1; }
+    }
+
+    context.PlayerDir = m_Direction;
+
+    auto box = m_Box;
+    box.Pos.x += int(x * kAdvancedPixel);
+    box.Pos.y -= int(y * kAdvancedPixel);
+
+    // 隣のタイルに移動できるかどうかチェック.
+    if (context.Map->CanMove(box))
+    {
+        if (m_Action == PLAYER_ACTION_NONE)
+        { m_Box.Pos = box.Pos; }
+    }
+}
+
+//-----------------------------------------------------------------------------
+//      イベント処理.
+//-----------------------------------------------------------------------------
+void Player::Event(UpdateContext& context)
+{
+    if (!context.IsEvent)
+    { return; }
+
+    // 選択しないといけない場合.
+    if (!!(m_Flags & PLAYER_ACTION_CHOICE))
+    {
+        // 選択肢Aを選ぶ.
+        if (context.Pad->IsPush(asdx::PAD_UP))
+        {
+            if (m_SelectOption != 0)
+            {
+                m_SelectOption = 0;
+                Message msg(MESSAGE_ID_EVENT_UPDATE_CURSOR, &m_SelectOption, sizeof(m_SelectOption));
+                SendMsg(msg);
+            }
+        }
+        // 選択肢Bを選ぶ.
+        else if (context.Pad->IsPush(asdx::PAD_DOWN))
+        {
+            if (m_SelectOption != 1)
+            {
+                m_SelectOption = 1;
+                Message msg(MESSAGE_ID_EVENT_UPDATE_CURSOR, &m_SelectOption, sizeof(m_SelectOption));
+                SendMsg(msg);
+            }
+        }
+        // 決定.
+        else if (context.Pad->IsPush(asdx::PAD_A))
+        {
+            // フラグを下す.
+            m_Flags &= ~(PLAYER_ACTION_CHOICE);
+
+            // ユーザーが設定した選択肢をブロードキャスト.
+            Message msg(MESSAGE_ID_EVENT_USER_REACTION, &m_SelectOption, sizeof(m_SelectOption));
+            SendMsg(msg);
+        }
+    }
+    // メッセージ送り.
+    else if (context.Pad->IsDown(asdx::PAD_A))
+    {
+        // フラグを下す.
+        m_Flags &= ~(PLAYER_ACTION_CHOICE);
+
+        // 次のメッセージ要求を送信.
+        Message msg(MESSAGE_ID_EVENT_NEXT);
+        SendMsg(msg);
+    }
+}
 
 //-----------------------------------------------------------------------------
 //      スポーンします.

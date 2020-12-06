@@ -17,7 +17,8 @@ enum MESSAGE_ID : unsigned int
     MESSAGE_ID_ENEMY_DEAD,          // 敵のHPが0になったとき.
     MESSAGE_ID_EVENT_RAISE,         // イベント処理.
     MESSAGE_ID_EVENT_BRUNCH,        // 分岐メッセージ.
-    MESSAGE_ID_EVENT_NEXT,          // 次のイベントへ.
+    MESSAGE_ID_EVENT_NEXT,          // 次のイベントを要求.
     MESSAGE_ID_EVENT_END,           // イベント終了.
     MESSAGE_ID_EVENT_USER_REACTION, // ユーザーによる選択肢確定.
+    MESSAGE_ID_EVENT_UPDATE_CURSOR, // 選択肢カーソル更新.
 };

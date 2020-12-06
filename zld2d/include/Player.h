@@ -20,7 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // PLAYER_ACTION
 ///////////////////////////////////////////////////////////////////////////////
-enum PLAYER_ACTION
+enum PLAYER_ACTION : uint8_t
 {
     PLAYER_ACTION_NONE,     // 無し.
     PLAYER_ACTION_ATTACK,   // 攻撃.
@@ -115,20 +115,21 @@ private:
     //=========================================================================
     // private variables.
     //=========================================================================
-    int                 m_Action        = 0;
-    Box                 m_Box           = {};
-    Box                 m_HitBox        = {};
-    uint8_t             m_Life          = 3;
-    uint8_t             m_MaxLife       = 3;
-    float               m_AnimLastTime  = 0.0f;
-    DIRECTION_STATE     m_Direction     = DIRECTION_LEFT;
-    uint8_t             m_AnimFrame     = 0;
+    int                 m_Action            = 0;                // アクション状態.
+    Box                 m_Box               = {};               // スプライト表示 兼 ダメージ判定用.
+    Box                 m_HitBox            = {};               // 攻撃判定用.
+    uint8_t             m_Life              = 3;                // HP.
+    uint8_t             m_MaxLife           = 3;                // 最大HP.
+    DIRECTION_STATE     m_Direction         = DIRECTION_LEFT;   // 移動方向.
+    uint32_t            m_Frame             = 0;                // フレーム数.
+    uint8_t             m_AnimFrame         = 0;                // スプライトアニメーション用フレームカウンター.
+    int                 m_NonDamageFrame    = 0;                // 残り無敵時間
+    uint8_t             m_Flags             = 0;                // 汎用フラグ.
+    asdx::Vector2       m_Scroll            = asdx::Vector2(0.0f, 0.0f);    // スクロール量.
+    uint8_t             m_SelectOption      = 0;                // 分岐選択肢の項目.
     asdx::Texture2D     m_PlayerTexture[12];
     asdx::Texture2D     m_WeaponTexture[4];
-    int                 m_NonDamageFrame = 0;
-    uint8_t             m_Flags         = 0;
-    asdx::Vector2       m_Scroll        = asdx::Vector2(0.0f, 0.0f);
-    uint8_t             m_SelectOption  = 0;
+
 
     //=========================================================================
     // private methods.
@@ -153,4 +154,14 @@ private:
     //! @brief      スクロール完了時の処理を行います.
     //-------------------------------------------------------------------------
     void OnScrollComplted();
+
+    //-------------------------------------------------------------------------
+    //! @brief      移動と攻撃処理.
+    //-------------------------------------------------------------------------
+    void Action(UpdateContext& context);
+
+    //-------------------------------------------------------------------------
+    //! @brief      イベント処理.
+    //-------------------------------------------------------------------------
+    void Event(UpdateContext& context);
 };
