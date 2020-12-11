@@ -34,8 +34,6 @@ static const char* kTexturePath[] = {
     "../res/texture/hud/select_cursor.tga",
 };
 
-
-
 } // namespace
 
 ///////////////////////////////////////////////////////////////////////////////

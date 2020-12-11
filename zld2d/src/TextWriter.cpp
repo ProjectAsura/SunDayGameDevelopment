@@ -49,7 +49,7 @@ bool TextWriter::Init
     auto hr = pFactory->CreateTextFormat(
         fontName,
         nullptr,
-        DWRITE_FONT_WEIGHT_SEMI_BOLD,
+        DWRITE_FONT_WEIGHT_BOLD,
         DWRITE_FONT_STYLE_NORMAL,
         DWRITE_FONT_STRETCH_NORMAL,
         fontSize,
@@ -113,6 +113,7 @@ void TextWriter::Draw(ID2D1DeviceContext* pContext, const wchar_t* text, float x
 
     // 左寄せ.
     m_Format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
+
     pContext->DrawText(text, length, m_Format.GetPtr(), &rect, m_Brush.GetPtr());
 }
 
@@ -140,6 +141,7 @@ void TextWriter::DrawLine(ID2D1DeviceContext* pContext, const wchar_t* text, int
 
     // 中央寄せ
     m_Format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+
     pContext->DrawText(text, length, m_Format.GetPtr(), &rect, m_Brush.GetPtr());
 }
 
