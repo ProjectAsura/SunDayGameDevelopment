@@ -277,6 +277,8 @@ void GameApp::OnTerm()
     m_Sprite.Term();
     m_Player.Term();
 
+    m_Switcher.Term();
+
     //m_EnemyTest.Term();
 
     m_EventSystem.Term();

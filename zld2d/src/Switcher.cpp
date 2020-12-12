@@ -48,8 +48,7 @@ Switcher::Switcher()
 , m_CurrTime    (0.0f)
 , m_Type        (SWITCH_TYPE_NONE)
 , m_NextPhase   (false)
-{
-}
+{ /* DO_NOTHING */ }
 
 //-----------------------------------------------------------------------------
 //      デストラクタです.
@@ -63,7 +62,8 @@ Switcher::~Switcher()
 bool Switcher::Init(ID3D11Device* pDevice)
 {
     MessageMgr::Instance().Add(this);
-    auto hr = pDevice->CreatePixelShader(SwitchPS, sizeof(SwitchPS), nullptr, m_PS.GetAddress());
+    auto hr = pDevice->CreatePixelShader(
+        SwitchPS, sizeof(SwitchPS), nullptr, m_PS.GetAddress());
     if (FAILED(hr))
     {
         ELOGA("Error : ID3D11Device::CreatePixelShader() Failed. errcode = 0x%x", hr);
@@ -216,7 +216,7 @@ void Switcher::OnMessage(const Message& msg)
 
                 if (m_Type == SWITCH_TYPE_FADE)
                 {
-                    m_Color.w = 0.0f;
+                    m_Color.w =  0.0f;
                     m_Radius  = -1.0f;
                 }
                 else if (m_Type == SWITCH_TYPE_HOLE)
