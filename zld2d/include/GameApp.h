@@ -12,12 +12,16 @@
 #include <asdxHid.h>
 #include <asdxTexture.h>
 #include <asdxTarget.h>
+#include <asdxVertexBuffer.h>
+#include <asdxConstantBuffer.h>
+#include <asdxShader.h>
 #include <Player.h>
 #include <SpriteSystem.h>
 #include <MapSystem.h>
 #include <Hud.h>
 //#include <enemy/EnemyTest.h>
 #include <EventSystem.h>
+#include <Switcher.h>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -55,7 +59,18 @@ private:
     //EnemyTest           m_EnemyTest;
     Hud                 m_Hud;
     MapInstance         m_MapData;
-    TextWriter          m_TextWriter;
+    Switcher            m_Switcher;
+
+    asdx::ColorTarget2D m_SceneColor;
+
+    asdx::VertexBuffer              m_TriangleVB;
+    asdx::VertexBuffer              m_QuadVB;
+
+    asdx::VertexShader              m_SurfaceVS;
+    asdx::RefPtr<ID3D11PixelShader> m_SurfacePS;
+    asdx::ConstantBuffer            m_SurfaceCB;
+
+    
 
     //=========================================================================
     // private methods.
@@ -68,4 +83,7 @@ private:
     void OnKey(const asdx::KeyEventArgs& args);
     void OnMouse(const asdx::MouseEventArgs& args);
     void OnTyping(uint32_t keyCode);
+
+    void DrawTriangle();
+    void DrawQuad();
 };

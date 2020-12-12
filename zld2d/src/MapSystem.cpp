@@ -263,14 +263,8 @@ void MapSystem::Scroll(DIRECTION_STATE dir)
         // フラグをおろす.
         m_IsScroll = false;
 
-        // 完了メッセージを送信.
-        Message msg(MESSAGE_ID_MAP_CHANGED);
-        SendMsg(msg);
-
         // マップを更新.
-        auto data = m_Data;
-        m_Data = m_Next;
-        m_Next = m_Data;
+        Change();
 
         // おしまい.
         return;
@@ -297,6 +291,26 @@ void MapSystem::Scroll(DIRECTION_STATE dir)
 }
 
 //-----------------------------------------------------------------------------
+//      マップ差し替え.
+//-----------------------------------------------------------------------------
+void MapSystem::Change()
+{
+    // 次のデータが無かったら読み込み.
+    if (m_Next == nullptr)
+    {
+    }
+
+    // 次のマップに差し替え.
+    auto data = m_Data;
+    m_Data = m_Next;
+    m_Next = m_Data;
+
+    // 完了メッセージを送信.
+    Message msg(MESSAGE_ID_MAP_CHANGED);
+    SendMsg(msg);
+}
+
+//-----------------------------------------------------------------------------
 //      メッセージ受信処理を行います.
 //-----------------------------------------------------------------------------
 void MapSystem::OnMessage(const Message& msg)
@@ -309,6 +323,14 @@ void MapSystem::OnMessage(const Message& msg)
 
     case MESSAGE_ID_MAP_SWITCH:
         { m_IsSwitch = true; }
+        break;
+
+    case MESSAGE_ID_MAP_CHANGED:
+        { m_IsSwitch = false; }
+        break;
+
+    case MESSAGE_ID_MAP_REQUEST:
+        { Change(); }
         break;
 
     default:

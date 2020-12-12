@@ -33,7 +33,8 @@ static const int      kWndHeight    = 200;  // メッセージウィンドウ縦
 static const int      kWndPosX      = 140;  // メッセージウィンドウX座標.
 static const int      kWndUpperY    = 64;   // メッセージウィンドウY座標(上側に表示する場合).
 static const int      kWndLowerY    = 488;  // メッセージウィンドウY座標(下側に表示する場合).
-static const float    kWndColor[]   = { 0.0f, 0.0f, 0.0, 0.8f }; // ウィンドウ乗算カラー.
+static const float    kWndColor[]   = { 0.0f, 0.0f, 0.0f, 0.8f }; // ウィンドウ乗算カラー.
+static const float    kTextColor[]  = { 1.0f, 1.0f, 1.0f, 1.0f }; // テキスト乗算カラー.
 
 } // namespace
 
@@ -114,7 +115,7 @@ void EventSystem::DrawWindow(SpriteSystem& sprite, bool upper)
         const int kY = (upper) ? 86 : 512;
         static const int kH = 42; // 32px文字サイズ + 10px上下間隔.
 
-        sprite.SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+        sprite.SetColor(kTextColor[0], kTextColor[1], kTextColor[2], kTextColor[3]);
         sprite.Draw(
             GetTexture(TEXTURE_HUD_SELECT_CURSOR),
             kWndPosX + 32,
@@ -132,7 +133,7 @@ void EventSystem::DrawMsg(ID2D1DeviceContext* context, bool upper)
     if (!m_IsDraw)
     { return; }
 
-    //m_Writer.SetColor(0.0f, 0.0f, 0.0f, 1.0f);
+    m_Writer.SetColor(kTextColor[0], kTextColor[1], kTextColor[2], kTextColor[3]);
 
     switch(m_Type)
     {

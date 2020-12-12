@@ -19,6 +19,7 @@
 #include <MessageMgr.h>
 #include <EventSystem.h>
 
+#include <Switcher.h> // debug.
 
 namespace {
 
@@ -62,6 +63,13 @@ static const Vector2i kOffset[] = {
     {  0,  64 }
 };
 
+enum PLAYER_STATE
+{
+    PLAYER_STATE_NONE = 0,
+    PLAYER_STATE_CHOICE = 0x1 << 0,
+    PLAYER_STATE_SCROLL = 0x1 << 1,
+    PLAYER_STATE_SWITCH = 0x1 << 2
+};
 
 //-----------------------------------------------------------------------------
 //      テクスチャ番号取得.
@@ -266,6 +274,27 @@ void Player::Update(UpdateContext& context)
         }
         
     }
+
+    if (context.Pad->IsDown(asdx::PAD_TRIGGER_R))
+    {
+        SwitchData data;
+        data.Color = asdx::Vector3(0.0f, 0.0f, 0.0f);
+        data.Type = SWITCH_TYPE_FADE;
+        data.Time = 2.0f;
+
+        Message msg(MESSAGE_ID_SWITCHER_REQUEST, &data, sizeof(data));
+        SendMsg(msg);
+    }
+    if (context.Pad->IsDown(asdx::PAD_TRIGGER_L))
+    {
+        SwitchData data;
+        data.Color = asdx::Vector3(0.0f, 0.0f, 0.0f);
+        data.Type = SWITCH_TYPE_HOLE;
+        data.Time = 2.0f;
+
+        Message msg(MESSAGE_ID_SWITCHER_REQUEST, &data, sizeof(data));
+        SendMsg(msg);
+    }
 #endif
 }
 
@@ -368,7 +397,7 @@ void Player::Event(UpdateContext& context)
     { return; }
 
     // 選択しないといけない場合.
-    if (!!(m_Flags & PLAYER_ACTION_CHOICE))
+    if (!!(m_Flags & PLAYER_STATE_CHOICE))
     {
         // 選択肢Aを選ぶ.
         if (context.Pad->IsPush(asdx::PAD_UP))
@@ -394,7 +423,7 @@ void Player::Event(UpdateContext& context)
         else if (context.Pad->IsPush(asdx::PAD_A))
         {
             // フラグを下す.
-            m_Flags &= ~(PLAYER_ACTION_CHOICE);
+            m_Flags &= ~(PLAYER_STATE_CHOICE);
 
             // ユーザーが設定した選択肢をブロードキャスト.
             Message msg(MESSAGE_ID_EVENT_USER_REACTION, &m_SelectOption, sizeof(m_SelectOption));
@@ -405,7 +434,7 @@ void Player::Event(UpdateContext& context)
     else if (context.Pad->IsDown(asdx::PAD_A))
     {
         // フラグを下す.
-        m_Flags &= ~(PLAYER_ACTION_CHOICE);
+        m_Flags &= ~(PLAYER_STATE_CHOICE);
 
         // 次のメッセージ要求を送信.
         Message msg(MESSAGE_ID_EVENT_NEXT);
@@ -460,6 +489,7 @@ void Player::Draw(SpriteSystem& sprite)
 void Player::OnScroll(const Message& msg)
 {
     auto dir = *msg.GetAs<uint8_t>();
+    m_Flags |= PLAYER_STATE_SCROLL;
 
     switch(dir)
     {
@@ -520,7 +550,7 @@ void Player::OnMessage(const Message& msg)
         break;
 
     case MESSAGE_ID_EVENT_BRUNCH:
-        { m_Flags |= PLAYER_ACTION_CHOICE; }
+        { m_Flags |= PLAYER_STATE_CHOICE; }
         break;
 
     default:
@@ -533,6 +563,9 @@ void Player::OnMessage(const Message& msg)
 //-----------------------------------------------------------------------------
 void Player::OnScrollComplted()
 {
+    if (!(m_Flags & PLAYER_STATE_SCROLL))
+    { return; }
+
     switch(m_Direction)
     {
     case DIRECTION_LEFT:
@@ -555,6 +588,7 @@ void Player::OnScrollComplted()
     m_Scroll.x  = 0;
     m_Scroll.y  = 0;
     m_AnimFrame = 0;
+    m_Flags &= ~(PLAYER_STATE_SCROLL);
 }
 
 //-----------------------------------------------------------------------------

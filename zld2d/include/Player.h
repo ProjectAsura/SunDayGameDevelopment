@@ -24,7 +24,6 @@ enum PLAYER_ACTION : uint8_t
 {
     PLAYER_ACTION_NONE,     // 無し.
     PLAYER_ACTION_ATTACK,   // 攻撃.
-    PLAYER_ACTION_CHOICE,   // メッセージ選択.
 };
 
 ///////////////////////////////////////////////////////////////////////////////

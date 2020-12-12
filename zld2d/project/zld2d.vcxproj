@@ -105,6 +105,7 @@
     <ClInclude Include="..\include\Hud.h" />
     <ClInclude Include="..\include\MessageMgr.h" />
     <ClInclude Include="..\include\Player.h" />
+    <ClInclude Include="..\include\Switcher.h" />
     <ClInclude Include="..\include\SpriteSystem.h" />
     <ClInclude Include="..\include\TextureId.h" />
     <ClInclude Include="..\include\TextureMgr.h" />
@@ -125,6 +126,7 @@
     <ClCompile Include="..\src\MessageMgr.cpp" />
     <ClCompile Include="..\src\Player.cpp" />
     <ClCompile Include="..\src\SpriteSystem.cpp" />
+    <ClCompile Include="..\src\Switcher.cpp" />
     <ClCompile Include="..\src\TextureMgr.cpp" />
     <ClCompile Include="..\src\TextWriter.cpp" />
   </ItemGroup>
@@ -134,9 +136,21 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="..\res\shader\SwitchPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="..\res\shader\SpritePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\res\shader\SurfacePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\res\shader\SurfaceVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
