@@ -35,7 +35,6 @@ public:
     Hud();
     ~Hud();
     void Draw(SpriteSystem& sprite, const Player& player);
-    void DrawWnd(SpriteSystem& sprite, bool upper = false);
 
 private:
     //=========================================================================
@@ -46,5 +45,5 @@ private:
     //=========================================================================
     // private methods.
     //=========================================================================
-    /* NOTHING */
+    void DrawLife(SpriteSystem& sprite, uint8_t curLife, uint8_t maxLife);
 };

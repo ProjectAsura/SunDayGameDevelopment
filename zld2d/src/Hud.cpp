@@ -22,8 +22,6 @@ static const int kLifeOffsetX = 32;
 static const int kLifeOffsetY = 8;
 static const int kLifeSize    = 32;
 
-
-
 } // namespace
 
 
@@ -48,9 +46,15 @@ Hud::~Hud()
 //-----------------------------------------------------------------------------
 void Hud::Draw(SpriteSystem& sprite, const Player& player)
 {
-    auto curLife = player.GetLife();
-    auto maxLife = player.GetMaxLife(); // MAX 10まで.
+    // ライフを描画.
+    DrawLife(sprite, player.GetLife(), player.GetMaxLife());
+}
 
+//-----------------------------------------------------------------------------
+//      ライフを描画します.
+//-----------------------------------------------------------------------------
+void Hud::DrawLife(SpriteSystem& sprite, uint8_t curLife, uint8_t maxLife)
+{
     for(auto i=1; i<=maxLife; ++i)
     {
         if (i <= curLife)
@@ -74,22 +78,5 @@ void Hud::Draw(SpriteSystem& sprite, const Player& player)
                 kLifeSize);
         }
     }
-
 }
 
-//-----------------------------------------------------------------------------
-//      メッセージウィンドウの枠を描画します.
-//-----------------------------------------------------------------------------
-void Hud::DrawWnd(SpriteSystem& sprite, bool upper)
-{
-    static const int kW = 1000;
-    static const int kH = 200;
-
-    static const int kX = 140;
-    int kY = (upper) ? 64 : 488;
-
-    sprite.SetColor(0.75f, 0.75f, 0.75f, 0.75f);
-    sprite.Draw(
-        GetTexture(TEXTURE_HUD_WINDOW),
-        kX, kY, kW, kH, 0);
-}
