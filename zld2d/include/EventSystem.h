@@ -8,6 +8,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
+#include <map>
 #include <MessageMgr.h>
 #include <TextWriter.h>
 #include <SpriteSystem.h>
@@ -20,19 +21,19 @@ struct EventData
 {
     uint32_t        ScenarioId;     //!< シナリオID.
     uint32_t        EventId;        //!< イベントID.
-    wchar_t         Text[141];      //!< Max28文字 × 5行.
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// BrunchData structure
+// EventRecord structure
 //////////////////////////////////////////////////////////////////////////////
-struct BrunchData
+struct EventRecord
 {
-    uint32_t        ScenarioId;     //!< シナリオID.
-    uint32_t        EventId;        //!< イベントID.
-    wchar_t         Text[29];       //!< Max28文字 × 5行.
-    wchar_t         Option[2][29];  //!< 選択肢.
+    bool        HasBrunch;
+    wchar_t     Text[141];
+    wchar_t     OptionA[28];
+    wchar_t     OptionB[28];
 };
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // EventSystem class
@@ -109,14 +110,12 @@ private:
     // private variables.
     //=========================================================================
     bool                m_IsDraw        = false;
-    wchar_t             m_Text[141]     = {};
-    wchar_t             m_Option[2][28] = {};
     uint32_t            m_ScenarioId    = 0;
     uint32_t            m_EventId       = 0;
-    uint8_t             m_Type          = 0;
     uint8_t             m_CurrentChoice = 0;
     ID2D1DeviceContext* m_pContext      = nullptr;
     TextWriter          m_Writer;
+    std::map<uint32_t, EventRecord>  m_Table;
 
     //=========================================================================
     // private methods.
@@ -131,4 +130,19 @@ private:
     //! @brief      2択の会話メッセージを表示します.
     //-------------------------------------------------------------------------
     void DrawChoices2(const wchar_t* msg, const wchar_t* choise0, const wchar_t* choise1, bool upper);
+
+    //-------------------------------------------------------------------------
+    //! @brief      シナリオをロードします.
+    //-------------------------------------------------------------------------
+    bool LoadScenario(uint32_t scenarioId);
+
+    //-------------------------------------------------------------------------
+    //! @brief      アクティブカラーを設定します.
+    //-------------------------------------------------------------------------
+    void SetActiveColor();
+
+    //-------------------------------------------------------------------------
+    //! @brief      デフォルトカラーを設定します.
+    //-------------------------------------------------------------------------
+    void SetDefaultColor();
 };

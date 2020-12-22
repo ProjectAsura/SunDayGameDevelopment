@@ -219,20 +219,12 @@ void Player::Update(UpdateContext& context)
             {
             case 0:
                 {
-                    //EventData e = {};
-                    //e.ScenarioId = 0;
-                    //e.EventId = 0;
+                    EventData e = {};
+                    e.ScenarioId = 0;
+                    e.EventId    = 0;
                     //wcscpy_s(e.Text, L"この先は危険じゃ。\nこの槍を持って行くがよい。");
 
-                    //Message msg(MESSAGE_ID_EVENT_RAISE, &e, sizeof(e));
-                    //SendMsg(msg);
-                    BrunchData b = {};
-                    b.ScenarioId = 0;
-                    b.EventId = 0;
-                    wcscpy_s(b.Text, L"お風呂にする?それともご飯にする?");
-                    wcscpy_s(b.Option[0], L"お風呂だ！");
-                    wcscpy_s(b.Option[1], L"もちろんごはん");
-                    Message msg(MESSAGE_ID_EVENT_BRUNCH, &b, sizeof(b));
+                    Message msg(MESSAGE_ID_EVENT_RAISE, &e, sizeof(e));
                     SendMsg(msg);
                 }
                 break;
