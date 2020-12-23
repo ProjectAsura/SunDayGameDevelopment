@@ -13,17 +13,17 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="ソースファイル\enemy">
-      <UniqueIdentifier>{87989859-bf17-4c91-a5d8-c7b89da14e51}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ヘッダー ファイル\enemy">
-      <UniqueIdentifier>{8ef51e3a-cf9b-48ce-ac13-c434ea7f0ec0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ヘッダー ファイル\gimmick">
       <UniqueIdentifier>{6507cca2-c884-429b-915b-cd439abff8e7}</UniqueIdentifier>
     </Filter>
     <Filter Include="ソースファイル\gimmick">
       <UniqueIdentifier>{8ccdeb29-c207-4a00-adbe-797350c296ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\component">
+      <UniqueIdentifier>{44c5592f-8e89-44d4-af10-396c83513797}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソースファイル\component">
+      <UniqueIdentifier>{bc5f5454-f89e-4123-9e01-e1afc0e609b9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -87,6 +87,18 @@
     <ClInclude Include="..\include\Switcher.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\Component.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Entity.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\component\RandomWalkComponent.h">
+      <Filter>ヘッダー ファイル\component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\component\LifeComponent.h">
+      <Filter>ヘッダー ファイル\component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\GameApp.cpp">
@@ -130,6 +142,15 @@
     </ClCompile>
     <ClCompile Include="..\src\Switcher.cpp">
       <Filter>ソースファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Entity.cpp">
+      <Filter>ソースファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\component\RandomWalkComponent.cpp">
+      <Filter>ソースファイル\component</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\component\LifeComponent.cpp">
+      <Filter>ソースファイル\component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

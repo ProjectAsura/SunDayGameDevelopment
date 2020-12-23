@@ -317,7 +317,7 @@ void GameApp::OnFrameMove(asdx::FrameEventArgs& args)
         auto x = (m_Player.GetBox().Pos.x + m_Player.GetBox().Size.x * 0.5f) / w;
         auto y = (m_Player.GetBox().Pos.y + m_Player.GetBox().Size.y * 0.5f) / h;
 
-        m_Switcher.Update(args.ElapsedTime, asdx::Vector2(x, y));
+        m_Switcher.Update(float(args.ElapsedTime), asdx::Vector2(x, y));
     }
 
     // メッセージ実行.

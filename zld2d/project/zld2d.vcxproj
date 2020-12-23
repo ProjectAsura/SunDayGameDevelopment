@@ -96,6 +96,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Box.h" />
+    <ClInclude Include="..\include\Component.h" />
+    <ClInclude Include="..\include\component\LifeComponent.h" />
+    <ClInclude Include="..\include\component\RandomWalkComponent.h" />
+    <ClInclude Include="..\include\Entity.h" />
     <ClInclude Include="..\include\EventSystem.h" />
     <ClInclude Include="..\include\DirectionState.h" />
     <ClInclude Include="..\include\Enemy.h" />
@@ -117,6 +121,9 @@
     <ClInclude Include="..\include\Vector2i.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\component\LifeComponent.cpp" />
+    <ClCompile Include="..\src\component\RandomWalkComponent.cpp" />
+    <ClCompile Include="..\src\Entity.cpp" />
     <ClCompile Include="..\src\EventSystem.cpp" />
     <ClCompile Include="..\src\Enemy.cpp" />
     <ClCompile Include="..\src\GameApp.cpp" />

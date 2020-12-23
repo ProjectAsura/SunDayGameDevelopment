@@ -41,7 +41,7 @@ struct EventTablePath
     const char* Path;           //!< ファイルパス.
 };
 
-// イベントテーブル.
+// シナリオテーブル.
 static const EventTablePath kEventTablePath[] = {
     { 0, "res/event/scenario_0.record" }, 
 };
@@ -80,13 +80,16 @@ bool LoadEventTable(const char* path, std::map<uint32_t, EventRecord>& result)
         if (count <= 0)
         { break; }
 
-        record.HasBrunch = (flag == 1);
+        record.HasBrunch  = (flag == 1);
+        record.UserSelect = 0;
         MultiByteToWideChar(CP_UTF8, 0, text,   141, record.Text,   141);
         MultiByteToWideChar(CP_UTF8, 0, optionA, 28, record.OptionA, 28);
         MultiByteToWideChar(CP_UTF8, 0, optionB, 28, record.OptionB, 28);
 
+    #if 0
         //ILOGA("eventId = %u, hasBrunch = %d, text = %ls, optionA = %ls, optionB = %ls",
         //    eventId, record.HasBrunch, record.Text, record.OptionA, record.OptionB);
+    #endif
 
         result[eventId] = record;
     }
@@ -187,7 +190,7 @@ void EventSystem::DrawWindow(SpriteSystem& sprite, bool upper)
         sprite.Draw(
             GetTexture(TEXTURE_HUD_SELECT_CURSOR),
             kWndPosX + 32,
-            kY + kH * (2 + m_CurrentChoice),
+            kY + kH * (2 + record.UserSelect),
             32,
             32);
     }
@@ -208,7 +211,14 @@ void EventSystem::DrawMsg(ID2D1DeviceContext* context, bool upper)
 
     auto& record = m_Table.at(m_EventId);
     if (record.HasBrunch)
-    { DrawChoices2(record.Text, record.OptionA, record.OptionB, upper); }
+    {
+        DrawChoices2(
+            record.Text,
+            record.OptionA,
+            record.OptionB,
+            record.UserSelect,
+            upper);
+    }
     else
     { DrawEventMsg(record.Text, upper); }
 }
@@ -227,23 +237,25 @@ void EventSystem::DrawEventMsg(const wchar_t* msg, bool upper)
 void EventSystem::DrawChoices2
 (
     const wchar_t* msg,
-    const wchar_t* choice0,
-    const wchar_t* choice1,
+    const wchar_t* optionA,
+    const wchar_t* optionB,
+    uint8_t        cursor,
     bool           upper
 )
 {
-    m_Writer.DrawLine(m_pContext, msg,     0, upper);
-    if (m_CurrentChoice == 0)
-    { SetActiveColor(); }
-    else
-    { SetDefaultColor(); }
-    m_Writer.DrawLine(m_pContext, choice0, 2, upper);
+    m_Writer.DrawLine(m_pContext, msg, 0, upper);
 
-    if (m_CurrentChoice == 1)
+    if (cursor == 0)
     { SetActiveColor(); }
     else
     { SetDefaultColor(); }
-    m_Writer.DrawLine(m_pContext, choice1, 3, upper);
+    m_Writer.DrawLine(m_pContext, optionA, 2, upper);
+
+    if (cursor == 1)
+    { SetActiveColor(); }
+    else
+    { SetDefaultColor(); }
+    m_Writer.DrawLine(m_pContext, optionB, 3, upper);
 
     SetDefaultColor();
 }
@@ -319,7 +331,8 @@ void EventSystem::OnMessage(const Message& msg)
     case MESSAGE_ID_EVENT_UPDATE_CURSOR:
         {
             auto cursor = *msg.GetAs<uint8_t>();
-            m_CurrentChoice = cursor;
+            auto& record = m_Table.at(m_EventId);
+            record.UserSelect = cursor;
         }
         break;
     }
