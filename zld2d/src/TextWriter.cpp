@@ -69,7 +69,16 @@ bool TextWriter::Init
         return false;
     }
 
+    // カラーブラシを生成.
+    hr = pContext->CreateSolidColorBrush( D2D1::ColorF(D2D1::ColorF::Blue), m_OutlineBrush.GetAddress() );
+    if ( FAILED( hr ) )
+    {
+        ELOG("Error : ID2D1DeviceContext::CreateSolidBrush() Failed. errcode = 0x%x", hr);
+        return false;
+    }
+
     m_FontSize = fontSize;
+    m_Outline  = true;
 
     return true;
 }
@@ -79,6 +88,7 @@ bool TextWriter::Init
 //-----------------------------------------------------------------------------
 void TextWriter::Term()
 {
+    m_OutlineBrush.Reset();
     m_Brush .Reset();
     m_Format.Reset();
 }
@@ -114,6 +124,30 @@ void TextWriter::Draw(ID2D1DeviceContext* pContext, const wchar_t* text, float x
     // 左寄せ.
     m_Format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
 
+    // 上下左右に1pixelずらして描く.
+    if (m_Outline)
+    {
+        auto r = rect;
+        r.left--;
+        r.right--;
+        pContext->DrawText(text, length, m_Format.GetPtr(), &r, m_OutlineBrush.GetPtr());
+
+        r = rect;
+        r.left++;
+        r.right++;
+        pContext->DrawText(text, length, m_Format.GetPtr(), &r, m_OutlineBrush.GetPtr());
+
+        r = rect;
+        r.top++;
+        r.bottom++;
+        pContext->DrawText(text, length, m_Format.GetPtr(), &r, m_OutlineBrush.GetPtr());
+
+        r = rect;
+        r.top--;
+        r.bottom--;
+        pContext->DrawText(text, length, m_Format.GetPtr(), &r, m_OutlineBrush.GetPtr());
+    }
+
     pContext->DrawText(text, length, m_Format.GetPtr(), &rect, m_Brush.GetPtr());
 }
 
@@ -142,6 +176,30 @@ void TextWriter::DrawLine(ID2D1DeviceContext* pContext, const wchar_t* text, int
     // 中央寄せ
     m_Format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 
+    // 上下左右に1pixelずらして描く.
+    if (m_Outline)
+    {
+        auto r = rect;
+        r.left--;
+        r.right--;
+        pContext->DrawText(text, length, m_Format.GetPtr(), &r, m_OutlineBrush.GetPtr());
+
+        r = rect;
+        r.left++;
+        r.right++;
+        pContext->DrawText(text, length, m_Format.GetPtr(), &r, m_OutlineBrush.GetPtr());
+
+        r = rect;
+        r.top++;
+        r.bottom++;
+        pContext->DrawText(text, length, m_Format.GetPtr(), &r, m_OutlineBrush.GetPtr());
+
+        r = rect;
+        r.top--;
+        r.bottom--;
+        pContext->DrawText(text, length, m_Format.GetPtr(), &r, m_OutlineBrush.GetPtr());
+    }
+
     pContext->DrawText(text, length, m_Format.GetPtr(), &rect, m_Brush.GetPtr());
 }
 
@@ -150,3 +208,28 @@ void TextWriter::DrawLine(ID2D1DeviceContext* pContext, const wchar_t* text, int
 //-----------------------------------------------------------------------------
 float TextWriter::GetFontSize() const
 { return m_FontSize; }
+
+//-----------------------------------------------------------------------------
+//      縁取りカラーを設定します.
+//-----------------------------------------------------------------------------
+void TextWriter::SetOutlineColor(float r, float g, float b, float a)
+{
+    D2D_COLOR_F color = {};
+    color.r = r;
+    color.g = g;
+    color.b = b;
+    color.a = a;
+    m_OutlineBrush->SetColor(color);
+}
+
+//-----------------------------------------------------------------------------
+//      縁取りフラグを設定します.
+//-----------------------------------------------------------------------------
+void TextWriter::SetOutline(bool enable)
+{ m_Outline = enable; }
+
+//-----------------------------------------------------------------------------
+//      縁取りフラグを取得します.
+//-----------------------------------------------------------------------------
+bool TextWriter::GetOutline() const
+{ return m_Outline; }
