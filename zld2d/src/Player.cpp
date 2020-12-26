@@ -355,7 +355,7 @@ void Player::Action(UpdateContext& context)
         }
         else
         {
-            if (next)
+            if (m_Frame % 8 == 0)
             { m_Action = PLAYER_ACTION_NONE; }
         }
     }

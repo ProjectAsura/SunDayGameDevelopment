@@ -102,7 +102,6 @@
     <ClInclude Include="..\include\Entity.h" />
     <ClInclude Include="..\include\EventSystem.h" />
     <ClInclude Include="..\include\DirectionState.h" />
-    <ClInclude Include="..\include\Enemy.h" />
     <ClInclude Include="..\include\GameApp.h" />
     <ClInclude Include="..\include\MapSystem.h" />
     <ClInclude Include="..\include\MessageId.h" />
@@ -125,7 +124,6 @@
     <ClCompile Include="..\src\component\RandomWalkComponent.cpp" />
     <ClCompile Include="..\src\Entity.cpp" />
     <ClCompile Include="..\src\EventSystem.cpp" />
-    <ClCompile Include="..\src\Enemy.cpp" />
     <ClCompile Include="..\src\GameApp.cpp" />
     <ClCompile Include="..\src\MapSystem.cpp" />
     <ClCompile Include="..\src\Gimmick.cpp" />

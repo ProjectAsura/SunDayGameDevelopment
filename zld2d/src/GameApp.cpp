@@ -241,7 +241,6 @@ bool GameApp::OnInit()
         }
     }
 
-
     // コピー用
     {
         auto hr = m_pDevice->CreatePixelShader(SurfacePS, sizeof(SurfacePS), nullptr, m_SurfacePS.GetAddress());
@@ -258,6 +257,30 @@ bool GameApp::OnInit()
         }
     }
 
+    // テキスト描画用ビットマップ作成.
+    {
+        // IDXGISurfaceを取得.
+        asdx::RefPtr<IDXGISurface> pSurface;
+        auto hr = m_pSwapChain->GetBuffer( 0, IID_IDXGISurface, reinterpret_cast<void**>(pSurface.GetAddress()) );
+        if ( FAILED( hr ) )
+        {
+            ELOG( "Error : IDXGISwapChain::GetBuffer() Failed." );
+            return false;
+        }
+
+        // D2Dビットマップを生成.
+        const auto bitmapProp = D2D1::BitmapProperties1(
+            D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
+            D2D1::PixelFormat( m_SwapChainFormat, D2D1_ALPHA_MODE_PREMULTIPLIED ) );
+
+        hr = m_pDeviceContext2D->CreateBitmapFromDxgiSurface( pSurface.GetPtr(), bitmapProp, m_pBitmap2D.GetAddress() );
+        if ( FAILED( hr ) )
+        {
+            ELOG( "Error : ID2D1DeviceContext::CreateBitmapFromDxgiSurface() Failed." );
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -266,6 +289,7 @@ bool GameApp::OnInit()
 //-----------------------------------------------------------------------------
 void GameApp::OnTerm()
 {
+    m_pBitmap2D.Reset();
     m_TriangleVB.Term();
 
     m_SurfaceVS.Term();

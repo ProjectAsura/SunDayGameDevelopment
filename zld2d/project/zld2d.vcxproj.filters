@@ -48,9 +48,6 @@
     <ClInclude Include="..\include\Box.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\Enemy.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\DirectionState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -120,9 +117,6 @@
       <Filter>ソースファイル\gimmick</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Gimmick.cpp">
-      <Filter>ソースファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Enemy.cpp">
       <Filter>ソースファイル</Filter>
     </ClCompile>
     <ClCompile Include="..\src\TextWriter.cpp">

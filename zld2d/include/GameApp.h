@@ -51,7 +51,8 @@ private:
     //=========================================================================
     // private variables.
     //=========================================================================
-    asdx::GamePad       m_Pad;
+    asdx::GamePad               m_Pad;
+    asdx::RefPtr<ID2D1Bitmap1>  m_pBitmap2D;
     Player              m_Player;
     SpriteSystem        m_Sprite;
     MapSystem           m_MapSystem;
