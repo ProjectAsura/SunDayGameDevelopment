@@ -143,7 +143,10 @@ void MapSystem::Draw(SpriteSystem& sprite, int playerY)
             auto x = int(pos.x + kTileSize * j) + kTileOffsetX;
             auto y = int(pos.y + kTileSize * i) + kTileOffsetY;
 
-            sprite.Draw(pSRV, x, y, kTileSize, kTileSize, 2);
+            // キャラよりもY座標が下側なら手前に表示されるように調整.
+            auto z = (!tile.Moveable && (playerY < y)) ? 0 : 2;
+
+            sprite.Draw(pSRV, x, y, kTileSize, kTileSize, z);
         }
 
         for(auto& itr : m_Next->Gimmicks)

@@ -198,95 +198,9 @@ void Player::Update(UpdateContext& context)
         { m_NonDamageFrame--; }
     }
 
-#if 1
-    // Debug.
-    if (context.Pad->IsDown(asdx::PAD_X))
-    {
-        // リスポーン.
-        m_Life = m_MaxLife;
-    }
-
-    if (context.Pad->IsDown(asdx::PAD_Y))
-    {
-        context.Map->Reset();
-    }
-
-    if (context.Pad->IsDown(asdx::PAD_SHOULDER_R))
-    {
-        if (context.ScenarioId == 0)
-        {
-            switch(context.EventId)
-            {
-            case 0:
-                {
-                    EventData e = {};
-                    e.ScenarioId = 0;
-                    e.EventId    = 0;
-                    //wcscpy_s(e.Text, L"この先は危険じゃ。\nこの槍を持って行くがよい。");
-
-                    Message msg(MESSAGE_ID_EVENT_RAISE, &e, sizeof(e));
-                    SendMsg(msg);
-                }
-                break;
-
-            case 1:
-                {
-                }
-                break;
-            }
-        }
-    }
-    if (context.Pad->IsDown(asdx::PAD_SHOULDER_L))
-    {
-        if (context.ScenarioId == 0)
-        {
-
-            switch(context.EventId)
-            {
-            case 0:
-                {
-                    //EventData e = {};
-                    //e.ScenarioId = 0;
-                    //e.EventId = 1;
-                    //wcscpy_s(e.Text, L"じじいに槍を貰った!\nAボタンを槍を振れるぞ。\n\nこれで敵をやっつけまくろう!!");
-                    //Message msg(MESSAGE_ID_EVENT_RAISE, &e, sizeof(e));
-                    //SendMsg(msg);
-                    Message msg(MESSAGE_ID_EVENT_END);
-                    SendMsg(msg);
-                }
-                break;
-
-            case 1:
-                {
-                    Message msg(MESSAGE_ID_EVENT_END);
-                    SendMsg(msg);
-                }
-                break;
-            }
-        }
-        
-    }
-
-    if (context.Pad->IsDown(asdx::PAD_TRIGGER_R))
-    {
-        SwitchData data;
-        data.Color = asdx::Vector3(0.0f, 0.0f, 0.0f);
-        data.Type = SWITCH_TYPE_FADE;
-        data.Time = 2.0f;
-
-        Message msg(MESSAGE_ID_SWITCHER_REQUEST, &data, sizeof(data));
-        SendMsg(msg);
-    }
-    if (context.Pad->IsDown(asdx::PAD_TRIGGER_L))
-    {
-        SwitchData data;
-        data.Color = asdx::Vector3(0.0f, 0.0f, 0.0f);
-        data.Type = SWITCH_TYPE_HOLE;
-        data.Time = 2.0f;
-
-        Message msg(MESSAGE_ID_SWITCHER_REQUEST, &data, sizeof(data));
-        SendMsg(msg);
-    }
+#if defined(DEBUG) || defined(_DEBUG)
+    // デバッグ用.
+    Debug(context);
 #endif
 }
 
@@ -363,7 +277,12 @@ void Player::Action(UpdateContext& context)
     {
         // スクロール中はアニメーション更新する.
         if (next)
-        { m_AnimFrame = (m_AnimFrame + 1) & 0x1; }
+        {
+            m_AnimFrame = (m_AnimFrame + 1) & 0x1;
+
+            // 歩きに強制的に戻す.
+            m_Action = PLAYER_ACTION_NONE;
+        }
     }
 
     context.PlayerDir = m_Direction;
@@ -470,8 +389,11 @@ void Player::Draw(SpriteSystem& sprite)
     // 武器描画.
     if (m_Action == PLAYER_ACTION_ATTACK)
     {
-        auto pSRV   = m_WeaponTexture[m_Direction].GetSRV();
-        sprite.Draw(pSRV, m_HitBox, 1);
+        auto pSRV = m_WeaponTexture[m_Direction].GetSRV();
+        auto box  = m_HitBox;
+        box.Pos.x += int(m_Scroll.x);
+        box.Pos.y += int(m_Scroll.y);
+        sprite.Draw(pSRV, box, 1);
     }
 }
 
@@ -605,3 +527,92 @@ void Player::OnReceiveDamage(const Message& msg)
     }
 }
 
+#if defined(DEBUG) || defined(_DEBUG)
+//-----------------------------------------------------------------------------
+//      デバッグ用操作です.
+//-----------------------------------------------------------------------------
+void Player::Debug(UpdateContext& context)
+{
+    if (context.Pad->IsDown(asdx::PAD_X))
+    {
+        // リスポーン.
+        m_Life = m_MaxLife;
+    }
+
+    if (context.Pad->IsDown(asdx::PAD_Y))
+    {
+        context.Map->Reset();
+    }
+
+    if (context.Pad->IsDown(asdx::PAD_SHOULDER_R))
+    {
+        if (context.ScenarioId == 0)
+        {
+            switch(context.EventId)
+            {
+            case 0:
+                {
+                    EventData e = {};
+                    e.ScenarioId = 0;
+                    e.EventId    = 0;
+                    //wcscpy_s(e.Text, L"この先は危険じゃ。\nこの槍を持って行くがよい。");
+
+                    Message msg(MESSAGE_ID_EVENT_RAISE, &e, sizeof(e));
+                    SendMsg(msg);
+                }
+                break;
+
+            case 1:
+                {
+                }
+                break;
+            }
+        }
+    }
+    if (context.Pad->IsDown(asdx::PAD_SHOULDER_L))
+    {
+        if (context.ScenarioId == 0)
+        {
+
+            switch(context.EventId)
+            {
+            case 0:
+                {
+                    Message msg(MESSAGE_ID_EVENT_END);
+                    SendMsg(msg);
+                }
+                break;
+
+            case 1:
+                {
+                    Message msg(MESSAGE_ID_EVENT_END);
+                    SendMsg(msg);
+                }
+                break;
+            }
+        }
+        
+    }
+
+    if (context.Pad->IsDown(asdx::PAD_TRIGGER_R))
+    {
+        SwitchData data;
+        data.Color = asdx::Vector3(0.0f, 0.0f, 0.0f);
+        data.Type = SWITCH_TYPE_FADE;
+        data.Time = 2.0f;
+
+        Message msg(MESSAGE_ID_SWITCHER_REQUEST, &data, sizeof(data));
+        SendMsg(msg);
+    }
+    if (context.Pad->IsDown(asdx::PAD_TRIGGER_L))
+    {
+        SwitchData data;
+        data.Color = asdx::Vector3(0.0f, 0.0f, 0.0f);
+        data.Type = SWITCH_TYPE_HOLE;
+        data.Time = 2.0f;
+
+        Message msg(MESSAGE_ID_SWITCHER_REQUEST, &data, sizeof(data));
+        SendMsg(msg);
+    }
+}
+#endif

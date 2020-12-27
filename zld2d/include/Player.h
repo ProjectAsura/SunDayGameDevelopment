@@ -163,4 +163,8 @@ private:
     //! @brief      イベント処理.
     //-------------------------------------------------------------------------
     void Event(UpdateContext& context);
+
+#if defined(DEBUG) || defined(_DEBUG)
+    void Debug(UpdateContext& context);
+#endif
 };
