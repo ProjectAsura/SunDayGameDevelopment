@@ -21,6 +21,7 @@ namespace {
 static const int kLifeOffsetX = 32;
 static const int kLifeOffsetY = 8;
 static const int kLifeSize    = 32;
+static const int kLifeShadowOffset = 4;
 
 } // namespace
 
@@ -59,9 +60,17 @@ void Hud::DrawLife(SpriteSystem& sprite, uint8_t curLife, uint8_t maxLife)
     {
         if (i <= curLife)
         {
-            sprite.SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+            sprite.SetColor(0.1f, 0.1f, 0.1f, 1.0f);
             sprite.Draw(
-                GetTexture(TEXTURE_HUD_LIFE_FULL),
+                GetTexture(TEXTURE_HUD_LIFE),
+                kLifeOffsetX + kLifeSize * (i - 1) + kLifeShadowOffset,
+                kLifeOffsetY + kLifeShadowOffset,
+                kLifeSize,
+                kLifeSize);
+
+            sprite.SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+            sprite.Draw(
+                GetTexture(TEXTURE_HUD_LIFE),
                 kLifeOffsetX + kLifeSize * (i - 1),
                 kLifeOffsetY,
                 kLifeSize,
@@ -69,9 +78,17 @@ void Hud::DrawLife(SpriteSystem& sprite, uint8_t curLife, uint8_t maxLife)
         }
         else
         {
-            sprite.SetColor(1.0f, 1.0f, 1.0f, 0.75f);
+            sprite.SetColor(0.9f, 0.9f, 0.9f, 0.75f);
             sprite.Draw(
-                GetTexture(TEXTURE_HUD_LIFE_LACK),
+                GetTexture(TEXTURE_HUD_LIFE),
+                kLifeOffsetX + kLifeSize * (i - 1) + kLifeShadowOffset,
+                kLifeOffsetY + kLifeShadowOffset,
+                kLifeSize,
+                kLifeSize);
+
+            sprite.SetColor(0.1f, 0.1f, 0.1f, 0.75f);
+            sprite.Draw(
+                GetTexture(TEXTURE_HUD_LIFE),
                 kLifeOffsetX + kLifeSize * (i - 1),
                 kLifeOffsetY,
                 kLifeSize,

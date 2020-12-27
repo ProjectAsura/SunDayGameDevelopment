@@ -27,7 +27,7 @@ static const int      kWndHeight        = 200;  // メッセージウィンド�
 static const int      kWndPosX          = 140;  // メッセージウィンドウX座標.
 static const int      kWndUpperY        = 64;   // メッセージウィンドウY座標(上側に表示する場合).
 static const int      kWndLowerY        = 488;  // メッセージウィンドウY座標(下側に表示する場合).
-static const float    kWndColor[]       = { 0.18f, 0.18f, 0.18f, 0.8f }; // ウィンドウ乗算カラー.
+static const float    kWndColor[]       = { 0.5f, 0.5f, 0.5f, 0.8f }; // ウィンドウ乗算カラー.
 static const float    kTextColor[]      = { 1.0f, 1.0f, 1.0f, 1.0f }; // テキスト乗算カラー.
 static const float    kActiveColor[]    = { 0.1f, 1.0f, 0.1f, 1.0f }; // アクティブカラー.
 

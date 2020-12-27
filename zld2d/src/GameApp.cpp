@@ -32,8 +32,7 @@ static const char* kTexturePath[] = {
     "../res/texture/map/block.tga",
 
     // HUD系.
-    "../res/texture/hud/star_full.tga",
-    "../res/texture/hud/star_lack.tga",
+    "../res/texture/hud/life.tga",
     "../res/texture/hud/wnd.tga",
     "../res/texture/hud/select_cursor.tga",
     "../res/texture/hud/hole.tga",
@@ -371,17 +370,16 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
     auto upper = (m_Player.GetBox().Pos.y >= 424);
     {
         // ターゲットをクリア.
-        float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
         m_pDeviceContext->ClearRenderTargetView(pMainRTV, m_ClearColor);
         m_pDeviceContext->ClearDepthStencilView(pDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
         m_pDeviceContext->OMSetRenderTargets(1, &pMainRTV, pDSV);
 
         D3D11_VIEWPORT viewport = {};
-        viewport.TopLeftX   = kMarginX;
-        viewport.TopLeftY   = kMarginY;
-        viewport.Width      = kTileTotalW;
-        viewport.Height     = kTileTotalH;
+        viewport.TopLeftX   = 0;
+        viewport.TopLeftY   = 0;
+        viewport.Width      = m_Width;
+        viewport.Height     = m_Height;
         viewport.MinDepth   = 0.0f;
         viewport.MaxDepth   = 1.0f;
 
@@ -390,6 +388,7 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
         scissor.right       = kMarginX + kTileTotalW;
         scissor.top         = kMarginY;
         scissor.bottom      = kMarginY + kTileTotalH;
+
 
         m_pDeviceContext->RSSetViewports(1, &viewport);
         m_pDeviceContext->RSSetScissorRects(1, &scissor);

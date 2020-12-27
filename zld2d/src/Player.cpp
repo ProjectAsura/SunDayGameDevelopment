@@ -154,6 +154,8 @@ bool Player::Init()
 
     SetTilePos(3, 5);
 
+    m_Life = m_MaxLife;
+
     MessageMgr::Instance().Add(this);
     return true;
 }
