@@ -378,8 +378,8 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
         D3D11_VIEWPORT viewport = {};
         viewport.TopLeftX   = 0;
         viewport.TopLeftY   = 0;
-        viewport.Width      = m_Width;
-        viewport.Height     = m_Height;
+        viewport.Width      = FLOAT(m_Width);
+        viewport.Height     = FLOAT(m_Height);
         viewport.MinDepth   = 0.0f;
         viewport.MaxDepth   = 1.0f;
 
@@ -426,8 +426,8 @@ void GameApp::OnFrameRender(asdx::FrameEventArgs& args)
         D3D11_VIEWPORT viewport = {};
         viewport.TopLeftX   = 0;
         viewport.TopLeftY   = 0;
-        viewport.Width      = m_Width;
-        viewport.Height     = m_Height;
+        viewport.Width      = FLOAT(m_Width);
+        viewport.Height     = FLOAT(m_Height);
         viewport.MinDepth   = 0.0f;
         viewport.MaxDepth   = 1.0f;
 
